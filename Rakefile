@@ -66,7 +66,7 @@ nugets_pack :pack do |n|
   n.files = FileList["#{project_name}/*.csproj"]
 
   n.with_metadata do |m|
-    m.description = 'A lightweight EventSourcing library'
+    m.description = 'A PostgreSql storage provider for Ledger'
     m.authors = 'Andy Dote'
     m.project_url = "https://github.com/pondidum/#{project_name}"
     m.license_url = "https://github.com/Pondidum/#{project_name}/blob/master/LICENSE.txt"
