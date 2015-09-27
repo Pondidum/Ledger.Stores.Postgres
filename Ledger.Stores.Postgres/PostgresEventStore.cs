@@ -62,7 +62,7 @@ namespace Ledger.Stores.Postgres
 			return _connection.ExecuteScalar<int>(sql, new { ID = aggregateID });
 		}
 
-		public void SaveEvents(TKey aggregateID, IEnumerable<DomainEvent> changes)
+		public void SaveEvents(TKey aggregateID, IEnumerable<IDomainEvent> changes)
 		{
 			var sql = Events("insert into {table} (aggregateID, sequence, event) values (@id, @sequence, @event::json);");
 
@@ -77,23 +77,23 @@ namespace Ledger.Stores.Postgres
 			}
 		}
 
-		public IEnumerable<DomainEvent> LoadEvents(TKey aggregateID)
+		public IEnumerable<IDomainEvent> LoadEvents(TKey aggregateID)
 		{
 			var sql = Events("select event from {table} where aggregateID = @id order by sequence asc");
 
 			return _connection
 				.Query<string>(sql, new { ID = aggregateID })
-				.Select(json => JsonConvert.DeserializeObject<DomainEvent>(json, _jsonSettings))
+				.Select(json => JsonConvert.DeserializeObject<IDomainEvent>(json, _jsonSettings))
 				.ToList();
 		}
 
-		public IEnumerable<DomainEvent> LoadEventsSince(TKey aggregateID, int sequenceID)
+		public IEnumerable<IDomainEvent> LoadEventsSince(TKey aggregateID, int sequenceID)
 		{
 			var sql = Events("select event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
 
 			return _connection
 				.Query<string>(sql, new { ID = aggregateID, Last = sequenceID })
-				.Select(json => JsonConvert.DeserializeObject<DomainEvent>(json, _jsonSettings))
+				.Select(json => JsonConvert.DeserializeObject<IDomainEvent>(json, _jsonSettings))
 				.ToList();
 		}
 
