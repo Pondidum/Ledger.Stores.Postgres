@@ -1,5 +1,6 @@
 ﻿using System;
 using Dapper;
+using Ledger.Conventions;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres
@@ -24,24 +25,17 @@ create table if not exists {snapshots-table} (
 );
 ";
 		private readonly NpgsqlConnection _connection;
-		private readonly ITableName _tableName;
 
 		public CreateGuidAggregateTablesCommand(NpgsqlConnection connection)
-			:this(connection, new KeyTypeTableName())
-		{
-		}
-
-		public CreateGuidAggregateTablesCommand(NpgsqlConnection connection, ITableName tableName)
 		{
 			_connection = connection;
-			_tableName = tableName;
 		}
 
-		public void Execute()
+		public void Execute(IStoreConventions conventions)
 		{
 			var sql = Sql
-				.Replace("{events-table}", _tableName.ForEvents<Guid>())
-				.Replace("{snapshots-table}", _tableName.ForSnapshots<Guid>());
+				.Replace("{events-table}", conventions.EventStoreName())
+				.Replace("{snapshots-table}", conventions.SnapshotStoreName());
 
 			_connection.Execute(sql);
 		}

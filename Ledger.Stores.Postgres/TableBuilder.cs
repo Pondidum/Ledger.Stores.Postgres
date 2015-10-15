@@ -7,29 +7,29 @@ namespace Ledger.Stores.Postgres
 {
 	public class TableBuilder
 	{
-		private readonly Dictionary<Type, Action> _creators;
+		private readonly Dictionary<Type, Action<IStoreConventions>> _creators;
 
-		public TableBuilder(NpgsqlConnection connection, ITableName tableName)
+		public TableBuilder(NpgsqlConnection connection)
 		{
-			_creators = new Dictionary<Type, Action>
+			_creators = new Dictionary<Type, Action<IStoreConventions>>
 			{
-				{typeof (Guid), () => new CreateGuidAggregateTablesCommand(connection, tableName).Execute()},
-				{typeof (int), () => new CreateIntAggregateTablesCommand(connection, tableName).Execute()}
+				{typeof (Guid), conventions => new CreateGuidAggregateTablesCommand(connection).Execute(conventions)},
+				{typeof (int), conventions => new CreateIntAggregateTablesCommand(connection).Execute(conventions)}
 			};
 		}
 
-		public void CreateTable<TKey>()
+		public void CreateTable(IStoreConventions conventions)
 		{
-			Action create;
+			Action<IStoreConventions> create;
 
-			if (_creators.TryGetValue(typeof (TKey), out create))
+			if (_creators.TryGetValue(conventions.KeyType, out create))
 			{
-				create();
+				create(conventions);
 			}
 
 			throw new NotSupportedException(string.Format(
 				"Cannot create a '{0}' aggregate keyed table, only '{1}' are supported.", 
-				typeof(TKey).Name,
+				conventions.KeyType.Name,
 				string.Join(", ", _creators.Keys.Select(k => k.Name))));
 		}
 	}

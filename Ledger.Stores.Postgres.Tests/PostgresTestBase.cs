@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using Dapper;
+using Ledger.Acceptance.TestObjects;
+using Ledger.Conventions;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres.Tests
@@ -17,7 +19,7 @@ namespace Ledger.Stores.Postgres.Tests
 			Connection.Open();
 			
 			var create = new CreateGuidAggregateTablesCommand(Connection);
-			create.Execute();
+			create.Execute(new StoreConventions(new KeyTypeNamingConvention(), typeof(Guid), typeof(TestAggregate)));
 		}
 
 		public void Dispose()

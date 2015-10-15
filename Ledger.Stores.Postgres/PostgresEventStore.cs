@@ -9,62 +9,59 @@ namespace Ledger.Stores.Postgres
 {
 	public class PostgresEventStore<TKey> : IEventStore<TKey>
 	{
-		private readonly ITableName _tableName;
 		private readonly NpgsqlConnection _connection;
 		private readonly JsonSerializerSettings _jsonSettings;
 		private readonly NpgsqlTransaction _transaction;
 
 		public PostgresEventStore(NpgsqlConnection connection)
-			: this(connection, new KeyTypeTableName())
+			: this(connection, null)
 		{
 		}
 
-		public PostgresEventStore(NpgsqlConnection connection, ITableName tableName)
-			: this(connection, null, tableName)
-		{
-		}
-
-		private PostgresEventStore(NpgsqlConnection connection, NpgsqlTransaction transaction, ITableName tableName)
+		private PostgresEventStore(NpgsqlConnection connection, NpgsqlTransaction transaction)
 		{
 			_connection = connection;
 			_transaction = transaction;
-			_tableName = tableName;
 			_jsonSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects };
 		}
 
-		public void CreateTable()
+		/// <summary>
+		///   
+		/// </summary>
+		/// <param name="conventions">_aggregateStore.Conventions&lt;TAggregate&gt;);</param>
+		public void CreateTable(IStoreConventions conventions)
 		{
-			var builder = new TableBuilder(_connection, _tableName);
-			builder.CreateTable<TKey>();
+			var builder = new TableBuilder(_connection);
+			builder.CreateTable(conventions);
 		}
 
-		private string Events(string sql)
+		private string Events(IStoreConventions conventions, string sql)
 		{
-			return sql.Replace("{table}", _tableName.ForEvents<TKey>());
+			return sql.Replace("{table}", conventions.EventStoreName());
 		}
 
-		private string Snapshots(string sql)
+		private string Snapshots(IStoreConventions conventions, string sql)
 		{
-			return sql.Replace("{table}", _tableName.ForSnapshots<TKey>());
+			return sql.Replace("{table}", conventions.SnapshotStoreName());
 		}
 
 		public int? GetLatestSequenceFor(IStoreConventions conventions, TKey aggregateID)
 		{
-			var sql = Events("select max(sequence) from {table} where aggregateID = @id");
+			var sql = Events(conventions, "select max(sequence) from {table} where aggregateID = @id");
 
 			return _connection.ExecuteScalar<int>(sql, new { ID = aggregateID });
 		}
 
 		public int? GetLatestSnapshotSequenceFor(IStoreConventions conventions, TKey aggregateID)
 		{
-			var sql = Snapshots("select max(sequence) from {table} where aggregateID = @id");
+			var sql = Snapshots(conventions, "select max(sequence) from {table} where aggregateID = @id");
 
 			return _connection.ExecuteScalar<int>(sql, new { ID = aggregateID });
 		}
 
 		public void SaveEvents(IStoreConventions conventions, TKey aggregateID, IEnumerable<IDomainEvent> changes)
 		{
-			var sql = Events("insert into {table} (aggregateID, sequence, event) values (@id, @sequence, @event::json);");
+			var sql = Events(conventions, "insert into {table} (aggregateID, sequence, event) values (@id, @sequence, @event::json);");
 
 			foreach (var change in changes)
 			{
@@ -79,7 +76,7 @@ namespace Ledger.Stores.Postgres
 
 		public IEnumerable<IDomainEvent> LoadEvents(IStoreConventions conventions, TKey aggregateID)
 		{
-			var sql = Events("select event from {table} where aggregateID = @id order by sequence asc");
+			var sql = Events(conventions, "select event from {table} where aggregateID = @id order by sequence asc");
 
 			return _connection
 				.Query<string>(sql, new { ID = aggregateID })
@@ -89,7 +86,7 @@ namespace Ledger.Stores.Postgres
 
 		public IEnumerable<IDomainEvent> LoadEventsSince(IStoreConventions conventions, TKey aggregateID, int sequenceID)
 		{
-			var sql = Events("select event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
+			var sql = Events(conventions, "select event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
 
 			return _connection
 				.Query<string>(sql, new { ID = aggregateID, Last = sequenceID })
@@ -99,7 +96,7 @@ namespace Ledger.Stores.Postgres
 
 		public ISequenced LoadLatestSnapshotFor(IStoreConventions conventions, TKey aggregateID)
 		{
-			var sql = Snapshots("select snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
+			var sql = Snapshots(conventions, "select snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
 
 			return _connection
 				.Query<string>(sql, new { ID = aggregateID })
@@ -109,7 +106,7 @@ namespace Ledger.Stores.Postgres
 
 		public void SaveSnapshot(IStoreConventions conventions, TKey aggregateID, ISequenced snapshot)
 		{
-			var sql = Snapshots("insert into {table} (aggregateID, sequence, snapshot) values (@id, @sequence, @snapshot::json);");
+			var sql = Snapshots(conventions, "insert into {table} (aggregateID, sequence, snapshot) values (@id, @sequence, @snapshot::json);");
 
 			_connection.Execute(sql, new
 			{
@@ -126,7 +123,7 @@ namespace Ledger.Stores.Postgres
 				_connection.Open();
 			}
 
-			return new PostgresEventStore<TKey>(_connection, _connection.BeginTransaction(), _tableName);
+			return new PostgresEventStore<TKey>(_connection, _connection.BeginTransaction());
 		}
 
 		public void Dispose()

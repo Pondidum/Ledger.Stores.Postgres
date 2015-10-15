@@ -22,24 +22,17 @@ create table if not exists {snapshots-table} (
 ";
 
 		private readonly NpgsqlConnection _connection;
-		private readonly ITableName _tableName;
 
 		public CreateIntAggregateTablesCommand(NpgsqlConnection connection)
-			: this(connection, new KeyTypeTableName())
-		{
-		}
-
-		public CreateIntAggregateTablesCommand(NpgsqlConnection connection, ITableName tableName)
 		{
 			_connection = connection;
-			_tableName = tableName;
 		}
 
-		public void Execute()
+		public void Execute(IStoreConventions conventions)
 		{
 			var sql = Sql
-				.Replace("{events-table}", _tableName.ForEvents<int>())
-				.Replace("{snapshots-table}", _tableName.ForSnapshots<int>());
+				.Replace("{events-table}", conventions.EventStoreName())
+				.Replace("{snapshots-table}", conventions.SnapshotStoreName());
 
 			_connection.Execute(sql);
 
