@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using Ledger.Acceptance.TestDomain;
+using Ledger.Acceptance.TestObjects;
+using Ledger.Conventions;
 using Shouldly;
 using Xunit;
 
@@ -9,10 +11,12 @@ namespace Ledger.Stores.Postgres.Tests
 	public class SnapshotSaveLoadTests : PostgresTestBase
 	{
 		private readonly PostgresEventStore<Guid> _store;
+		private readonly StoreConventions _conventions;
 
 		public SnapshotSaveLoadTests()
 		{
 			_store = new PostgresEventStore<Guid>(Connection);
+			_conventions = new StoreConventions(new KeyTypeNamingConvention(), typeof(Guid), typeof(TestAggregate));
 		}
 
 		[Fact]
@@ -20,12 +24,12 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			_store.SaveSnapshot(id, new CandidateMemento{Sequence = 0});
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 1 });
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 2 });
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 3 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento{Sequence = 0});
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 1 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 2 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 3 });
 
-			var loaded = _store.LoadLatestSnapshotFor(id);
+			var loaded = _store.LoadLatestSnapshotFor(_conventions, id);
 
 			loaded.ShouldBeOfType<CandidateMemento>();
 		}
@@ -35,11 +39,11 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 4 });
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 5 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 4 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 5 });
 
 			_store
-				.LoadLatestSnapshotFor(id)
+				.LoadLatestSnapshotFor(_conventions, id)
 				.Sequence
 				.ShouldBe(5);
 		}
@@ -49,11 +53,11 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 4 });
-			_store.SaveSnapshot(id, new CandidateMemento { Sequence = 5 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 4 });
+			_store.SaveSnapshot(_conventions, id, new CandidateMemento { Sequence = 5 });
 
 			_store
-				.GetLatestSnapshotSequenceFor(id)
+				.GetLatestSnapshotSequenceFor(_conventions, id)
 				.ShouldBe(5);
 		}
 
@@ -63,7 +67,7 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			var loaded = _store.LoadLatestSnapshotFor(id);
+			var loaded = _store.LoadLatestSnapshotFor(_conventions, id);
 
 			loaded.ShouldBe(null);
 		}

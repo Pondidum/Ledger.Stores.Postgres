@@ -48,21 +48,21 @@ namespace Ledger.Stores.Postgres
 			return sql.Replace("{table}", _tableName.ForSnapshots<TKey>());
 		}
 
-		public int? GetLatestSequenceFor(TKey aggregateID)
+		public int? GetLatestSequenceFor(IStoreConventions conventions, TKey aggregateID)
 		{
 			var sql = Events("select max(sequence) from {table} where aggregateID = @id");
 
 			return _connection.ExecuteScalar<int>(sql, new { ID = aggregateID });
 		}
 
-		public int? GetLatestSnapshotSequenceFor(TKey aggregateID)
+		public int? GetLatestSnapshotSequenceFor(IStoreConventions conventions, TKey aggregateID)
 		{
 			var sql = Snapshots("select max(sequence) from {table} where aggregateID = @id");
 
 			return _connection.ExecuteScalar<int>(sql, new { ID = aggregateID });
 		}
 
-		public void SaveEvents(TKey aggregateID, IEnumerable<IDomainEvent> changes)
+		public void SaveEvents(IStoreConventions conventions, TKey aggregateID, IEnumerable<IDomainEvent> changes)
 		{
 			var sql = Events("insert into {table} (aggregateID, sequence, event) values (@id, @sequence, @event::json);");
 
@@ -77,7 +77,7 @@ namespace Ledger.Stores.Postgres
 			}
 		}
 
-		public IEnumerable<IDomainEvent> LoadEvents(TKey aggregateID)
+		public IEnumerable<IDomainEvent> LoadEvents(IStoreConventions conventions, TKey aggregateID)
 		{
 			var sql = Events("select event from {table} where aggregateID = @id order by sequence asc");
 
@@ -87,7 +87,7 @@ namespace Ledger.Stores.Postgres
 				.ToList();
 		}
 
-		public IEnumerable<IDomainEvent> LoadEventsSince(TKey aggregateID, int sequenceID)
+		public IEnumerable<IDomainEvent> LoadEventsSince(IStoreConventions conventions, TKey aggregateID, int sequenceID)
 		{
 			var sql = Events("select event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
 
@@ -97,7 +97,7 @@ namespace Ledger.Stores.Postgres
 				.ToList();
 		}
 
-		public ISequenced LoadLatestSnapshotFor(TKey aggregateID)
+		public ISequenced LoadLatestSnapshotFor(IStoreConventions conventions, TKey aggregateID)
 		{
 			var sql = Snapshots("select snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
 
@@ -107,7 +107,7 @@ namespace Ledger.Stores.Postgres
 				.FirstOrDefault();
 		}
 
-		public void SaveSnapshot(TKey aggregateID, ISequenced snapshot)
+		public void SaveSnapshot(IStoreConventions conventions, TKey aggregateID, ISequenced snapshot)
 		{
 			var sql = Snapshots("insert into {table} (aggregateID, sequence, snapshot) values (@id, @sequence, @snapshot::json);");
 
