@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
@@ -10,7 +11,6 @@ namespace Ledger.Stores.Postgres
 	public class PostgresEventStore<TKey> : IEventStore<TKey>
 	{
 		private readonly NpgsqlConnection _connection;
-		private readonly JsonSerializerSettings _jsonSettings;
 		private readonly NpgsqlTransaction _transaction;
 
 		public PostgresEventStore(NpgsqlConnection connection)
@@ -22,7 +22,6 @@ namespace Ledger.Stores.Postgres
 		{
 			_connection = connection;
 			_transaction = transaction;
-			_jsonSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects };
 		}
 
 		/// <summary>
@@ -61,7 +60,7 @@ namespace Ledger.Stores.Postgres
 
 		public void SaveEvents(IStoreConventions conventions, TKey aggregateID, IEnumerable<IDomainEvent> changes)
 		{
-			var sql = Events(conventions, "insert into {table} (aggregateID, sequence, event) values (@id, @sequence, @event::json);");
+			var sql = Events(conventions, "insert into {table} (aggregateID, sequence, eventType, event) values (@id, @sequence, @eventType, @event::json);");
 
 			foreach (var change in changes)
 			{
@@ -69,50 +68,50 @@ namespace Ledger.Stores.Postgres
 				{
 					ID = aggregateID,
 					Sequence = change.Sequence,
-					Event = JsonConvert.SerializeObject(change, _jsonSettings)
+					EventType = change.GetType().FullName,
+					Event = JsonConvert.SerializeObject(change)
 				});
 			}
 		}
 
 		public IEnumerable<IDomainEvent> LoadEvents(IStoreConventions conventions, TKey aggregateID)
 		{
-			var sql = Events(conventions, "select event from {table} where aggregateID = @id order by sequence asc");
+			var sql = Events(conventions, "select eventType, event from {table} where aggregateID = @id order by sequence asc");
 
 			return _connection
-				.Query<string>(sql, new { ID = aggregateID })
-				.Select(json => JsonConvert.DeserializeObject<IDomainEvent>(json, _jsonSettings))
-				.ToList();
+				.Query<EventDto>(sql, new { ID = aggregateID })
+				.Select(e => e.Process());
 		}
 
 		public IEnumerable<IDomainEvent> LoadEventsSince(IStoreConventions conventions, TKey aggregateID, int sequenceID)
 		{
-			var sql = Events(conventions, "select event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
+			var sql = Events(conventions, "select eventType, event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
 
 			return _connection
-				.Query<string>(sql, new { ID = aggregateID, Last = sequenceID })
-				.Select(json => JsonConvert.DeserializeObject<IDomainEvent>(json, _jsonSettings))
-				.ToList();
+				.Query<EventDto>(sql, new {ID = aggregateID, Last = sequenceID})
+				.Select(e => e.Process());
 		}
 
 		public ISequenced LoadLatestSnapshotFor(IStoreConventions conventions, TKey aggregateID)
 		{
-			var sql = Snapshots(conventions, "select snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
+			var sql = Snapshots(conventions, "select snapshotType, snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
 
 			return _connection
-				.Query<string>(sql, new { ID = aggregateID })
-				.Select(json => JsonConvert.DeserializeObject<ISequenced>(json, _jsonSettings))
+				.Query<SnapshotDto>(sql, new { ID = aggregateID })
+				.Select(s => s.Process())
 				.FirstOrDefault();
 		}
 
 		public void SaveSnapshot(IStoreConventions conventions, TKey aggregateID, ISequenced snapshot)
 		{
-			var sql = Snapshots(conventions, "insert into {table} (aggregateID, sequence, snapshot) values (@id, @sequence, @snapshot::json);");
+			var sql = Snapshots(conventions, "insert into {table} (aggregateID, sequence, snapshotType, snapshot) values (@id, @sequence, @snapshotType, @snapshot::json);");
 
 			_connection.Execute(sql, new
 			{
 				ID = aggregateID,
 				Sequence = snapshot.Sequence,
-				Snapshot = JsonConvert.SerializeObject(snapshot, _jsonSettings)
+				SnapshotType = snapshot.GetType().FullName,
+				Snapshot = JsonConvert.SerializeObject(snapshot)
 			});
 		}
 
@@ -134,6 +133,28 @@ namespace Ledger.Stores.Postgres
 			}
 
 			_connection.Close();
+		}
+
+		private class EventDto
+		{
+			public string EventType { get; set; }
+			public string Event { get; set; }
+
+			public IDomainEvent Process()
+			{
+				return (IDomainEvent) JsonConvert.DeserializeObject(Event, Type.GetType(EventType));
+			}
+		}
+
+		private class SnapshotDto
+		{
+			public string SnapshotType { get; set; }
+			public string Snapshot { get; set; }
+
+			public ISequenced Process()
+			{
+				return (ISequenced)JsonConvert.DeserializeObject(Snapshot, Type.GetType(SnapshotType));
+			}
 		}
 	}
 }
