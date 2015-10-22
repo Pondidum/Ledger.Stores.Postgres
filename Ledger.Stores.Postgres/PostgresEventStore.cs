@@ -68,7 +68,7 @@ namespace Ledger.Stores.Postgres
 				{
 					ID = aggregateID,
 					Sequence = change.Sequence,
-					EventType = change.GetType().FullName,
+					EventType = change.GetType().AssemblyQualifiedName,
 					Event = JsonConvert.SerializeObject(change)
 				});
 			}
@@ -110,7 +110,7 @@ namespace Ledger.Stores.Postgres
 			{
 				ID = aggregateID,
 				Sequence = snapshot.Sequence,
-				SnapshotType = snapshot.GetType().FullName,
+				SnapshotType = snapshot.GetType().AssemblyQualifiedName,
 				Snapshot = JsonConvert.SerializeObject(snapshot)
 			});
 		}
