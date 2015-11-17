@@ -8,7 +8,7 @@ namespace Ledger.Stores.Postgres.Tests
 	{
 		public AcceptanceRegistry()
 		{
-			For<IEventStore<Guid>>().Use(() => new PostgresEventStore<Guid>(new NpgsqlConnection(PostgresTestBase.ConnectionString)));
+			For<IEventStore>().Use(() => new PostgresEventStore(new NpgsqlConnection(PostgresTestBase.ConnectionString)));
 		}
 	}
 }
