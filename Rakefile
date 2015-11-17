@@ -52,6 +52,7 @@ test_runner :test do |xunit|
   xunit.files = files
   xunit.add_parameter '-quiet' if ci_run
   xunit.add_parameter '-nologo'
+  xunit.parameters << %W[-maxthreads 1]
 end
 
 desc 'Build all nuget packages'

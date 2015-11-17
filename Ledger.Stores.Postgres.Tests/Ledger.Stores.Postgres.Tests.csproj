@@ -90,6 +90,7 @@
   <ItemGroup>
     <Compile Include="AcceptanceRegistry.cs" />
     <Compile Include="EventSaveLoadTests.cs" />
+    <Compile Include="PostgresStoreWriterTests.cs" />
     <Compile Include="PostgresTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequiresPostgresFactAttribute.cs" />
