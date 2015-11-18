@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using Dapper;
-using Newtonsoft.Json;
-using Npgsql;
+﻿using Npgsql;
 
 namespace Ledger.Stores.Postgres
 {
@@ -18,13 +13,13 @@ namespace Ledger.Stores.Postgres
 
 		public IStoreReader<TKey> CreateReader<TKey>(IStoreConventions storeConventions)
 		{
-			if (_connection.State != ConnectionState.Open)
-				_connection.Open();
+			var connection = _connection.Clone();
+			connection.Open();
 
-			var transaction = _connection.BeginTransaction();
+			var transaction = connection.BeginTransaction();
 
 			return new PostgresStoreReader<TKey>(
-				_connection,
+				connection,
 				transaction,
 				sql => Events(storeConventions, sql),
 				sql => Snapshots(storeConventions, sql)
@@ -33,13 +28,13 @@ namespace Ledger.Stores.Postgres
 
 		public IStoreWriter<TKey> CreateWriter<TKey>(IStoreConventions storeConventions)
 		{
-			if (_connection.State != ConnectionState.Open)
-				_connection.Open();
+			var connection = _connection.Clone();
+			connection.Open();
 
-			var transaction = _connection.BeginTransaction();
+			var transaction = connection.BeginTransaction();
 
 			return new PostgresStoreWriter<TKey>(
-				_connection,
+				connection,
 				transaction,
 				sql => Events(storeConventions, sql),
 				sql => Snapshots(storeConventions, sql)
