@@ -1,7 +1,4 @@
-﻿using System;
-using Npgsql;
-using Shouldly;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace Ledger.Stores.Postgres.Tests
@@ -16,26 +13,8 @@ namespace Ledger.Stores.Postgres.Tests
 		}
 
 		[Fact]
-		public void Run()
+		public void When_testing_something()
 		{
-			using (var connection = new NpgsqlConnection(PostgresTestBase.ConnectionString))
-			{
-				connection.Open();
-				var tx = connection.BeginTransaction();
-
-				var writer = new PostgresStoreWriter<Guid>(
-					connection, 
-					tx, 
-					sql => sql.Replace("{table}", "events_guid"),
-					sql => sql.Replace("{table}", "snapshots_guid"));
-
-				var latest = writer.GetLatestSequenceFor(Guid.NewGuid());
-
-				_output.WriteLine(Convert.ToString(latest));
-
-				latest.ShouldBe(null);
-			}
-				
-        }
+		}
 	}
 }
