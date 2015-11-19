@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using System.Data;
+using Npgsql;
 
 namespace Ledger.Stores.Postgres
 {
@@ -14,7 +15,9 @@ namespace Ledger.Stores.Postgres
 		public IStoreReader<TKey> CreateReader<TKey>(IStoreConventions storeConventions)
 		{
 			var connection = _connection.Clone();
-			connection.Open();
+
+			if (connection.State != ConnectionState.Open)
+				connection.Open();
 
 			var transaction = connection.BeginTransaction();
 
@@ -29,7 +32,9 @@ namespace Ledger.Stores.Postgres
 		public IStoreWriter<TKey> CreateWriter<TKey>(IStoreConventions storeConventions)
 		{
 			var connection = _connection.Clone();
-			connection.Open();
+
+			if (connection.State != ConnectionState.Open)
+				connection.Open();
 
 			var transaction = connection.BeginTransaction();
 
