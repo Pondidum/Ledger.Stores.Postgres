@@ -39,12 +39,12 @@ namespace Ledger.Stores.Postgres
 				.Select(e => e.Process());
 		}
 
-		public ISequenced LoadLatestSnapshotFor(TKey aggregateID)
+		public ISnapshot<TKey> LoadLatestSnapshotFor(TKey aggregateID)
 		{
 			var sql = _getSnapshots("select snapshotType, snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
 
 			return _connection
-				.Query<SnapshotDto>(sql, new { ID = aggregateID }, _transaction)
+				.Query<SnapshotDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
 				.Select(s => s.Process())
 				.FirstOrDefault();
 		}

@@ -53,7 +53,7 @@ namespace Ledger.Stores.Postgres
 			}
 		}
 
-		public void SaveSnapshot(TKey aggregateID, ISequenced snapshot)
+		public void SaveSnapshot(TKey aggregateID, ISnapshot<TKey> snapshot)
 		{
 			var sql = _getSnapshots("insert into {table} (aggregateID, sequence, snapshotType, snapshot) values (@id, @sequence, @snapshotType, @snapshot::json);");
 

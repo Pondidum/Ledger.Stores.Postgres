@@ -3,14 +3,14 @@ using Newtonsoft.Json;
 
 namespace Ledger.Stores.Postgres
 {
-	internal class SnapshotDto
+	internal class SnapshotDto<TKey>
 	{
 		public string SnapshotType { get; set; }
 		public string Snapshot { get; set; }
 
-		public ISequenced Process()
+		public ISnapshot<TKey> Process()
 		{
-			return (ISequenced)JsonConvert.DeserializeObject(Snapshot, Type.GetType(SnapshotType));
+			return (ISnapshot<TKey>)JsonConvert.DeserializeObject(Snapshot, Type.GetType(SnapshotType));
 		}
 	}
 }
