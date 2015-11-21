@@ -21,21 +21,21 @@ namespace Ledger.Stores.Postgres
 			_getSnapshots = getSnapshots;
 		}
 
-		public IEnumerable<IDomainEvent> LoadEvents(TKey aggregateID)
+		public IEnumerable<IDomainEvent<TKey>> LoadEvents(TKey aggregateID)
 		{
 			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id order by sequence asc");
 
 			return _connection
-				.Query<EventDto>(sql, new { ID = aggregateID }, _transaction)
+				.Query<EventDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
 				.Select(e => e.Process());
 		}
 
-		public IEnumerable<IDomainEvent> LoadEventsSince(TKey aggregateID, int sequenceID)
+		public IEnumerable<IDomainEvent<TKey>> LoadEventsSince(TKey aggregateID, int sequenceID)
 		{
 			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
 
 			return _connection
-				.Query<EventDto>(sql, new { ID = aggregateID, Last = sequenceID }, _transaction)
+				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = sequenceID }, _transaction)
 				.Select(e => e.Process());
 		}
 

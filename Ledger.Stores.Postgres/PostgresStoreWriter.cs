@@ -35,7 +35,7 @@ namespace Ledger.Stores.Postgres
 			return _connection.ExecuteScalar<int?>(sql, new { ID = aggregateID }, _transaction);
 		}
 
-		public void SaveEvents(TKey aggregateID, IEnumerable<IDomainEvent> changes)
+		public void SaveEvents(TKey aggregateID, IEnumerable<IDomainEvent<TKey>> changes)
 		{
 			var sql = _getEvents("insert into {table} (aggregateID, sequence, eventType, event) values (@id, @sequence, @eventType, @event::json);");
 

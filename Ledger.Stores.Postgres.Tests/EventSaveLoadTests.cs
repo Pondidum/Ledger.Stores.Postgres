@@ -22,7 +22,7 @@ namespace Ledger.Stores.Postgres.Tests
 		[RequiresPostgresFact]
 		public void Events_should_keep_types_and_be_ordered()
 		{
-			var toSave = new DomainEvent[]
+			var toSave = new DomainEvent<Guid>[]
 			{
 				new NameChangedByDeedPoll {Sequence = 0, NewName = "Deed"},
 				new FixNameSpelling {Sequence = 1, NewName = "Fix"},
@@ -78,7 +78,7 @@ namespace Ledger.Stores.Postgres.Tests
 		[RequiresPostgresFact]
 		public void Loading_events_since_only_gets_events_after_the_sequence()
 		{
-			var toSave = new DomainEvent[]
+			var toSave = new DomainEvent<Guid>[]
 			{
 				new NameChangedByDeedPoll { Sequence = 3 },
 				new FixNameSpelling { Sequence = 4 },
