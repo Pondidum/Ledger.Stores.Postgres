@@ -35,7 +35,7 @@ namespace Ledger.Stores.Postgres
 			return _connection.ExecuteScalar<int?>(sql, new { ID = aggregateID }, _transaction);
 		}
 
-		public void SaveEvents(TKey aggregateID, IEnumerable<IDomainEvent<TKey>> changes)
+		public void SaveEvents(IEnumerable<IDomainEvent<TKey>> changes)
 		{
 			var sql = _getEvents("insert into {table} (aggregateID, sequence, eventType, event) values (@id, @sequence, @eventType, @event::json);");
 
@@ -43,7 +43,7 @@ namespace Ledger.Stores.Postgres
 			{
 				var dto = new
 				{
-					ID = aggregateID,
+					ID = change.AggregateID,
 					Sequence = change.Sequence,
 					EventType = change.GetType().AssemblyQualifiedName,
 					Event = JsonConvert.SerializeObject(change)
@@ -53,13 +53,13 @@ namespace Ledger.Stores.Postgres
 			}
 		}
 
-		public void SaveSnapshot(TKey aggregateID, ISnapshot<TKey> snapshot)
+		public void SaveSnapshot(ISnapshot<TKey> snapshot)
 		{
 			var sql = _getSnapshots("insert into {table} (aggregateID, sequence, snapshotType, snapshot) values (@id, @sequence, @snapshotType, @snapshot::json);");
 
 			var dto = new
 			{
-				ID = aggregateID,
+				ID = snapshot.AggregateID,
 				Sequence = snapshot.Sequence,
 				SnapshotType = snapshot.GetType().AssemblyQualifiedName,
 				Snapshot = JsonConvert.SerializeObject(snapshot)

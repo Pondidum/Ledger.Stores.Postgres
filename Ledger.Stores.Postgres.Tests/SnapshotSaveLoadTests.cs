@@ -26,10 +26,10 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(_conventions))
 			{
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 0});
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 1});
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 2});
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 3});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 0});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 1});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 2});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 3});
 			}
 
 			var loaded = _store.CreateReader<Guid>(_conventions).LoadLatestSnapshotFor(id);
@@ -44,8 +44,8 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(_conventions))
 			{
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 4});
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 5});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5});
 			}
 			_store
 				.CreateReader<Guid>(_conventions)
@@ -61,8 +61,8 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(_conventions))
 			{
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 4});
-				writer.SaveSnapshot(id, new CandidateMemento {Sequence = 5});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5});
 
 				writer
 					.GetLatestSnapshotSequenceFor(id)
