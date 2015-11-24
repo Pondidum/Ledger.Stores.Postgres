@@ -12,6 +12,7 @@ create extension if not exists ""uuid-ossp"";
 
 create table if not exists {events-table} (
 	id uuid primary key default uuid_generate_v4(),
+	timestamp timestamptz not null,
 	aggregateID uuid not null,
 	sequence integer not null,
 	eventType varchar(255) not null,
@@ -20,6 +21,7 @@ create table if not exists {events-table} (
 
 create table if not exists {snapshots-table} (
 	id uuid primary key default uuid_generate_v4(),
+	timestamp timestamptz not null,
 	aggregateID uuid not null,
 	sequence integer not null,
 	snapshotType varchar(255) not null,

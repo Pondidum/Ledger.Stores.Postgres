@@ -8,6 +8,7 @@ namespace Ledger.Stores.Postgres
 		private const string Sql = @"
 create table if not exists {events-table} (
 	id serial primary key,
+	timestamp timestamptz not null,
 	aggregateID int not null,
 	sequence integer not null,
 	eventType varchar(255) not null,
@@ -16,6 +17,7 @@ create table if not exists {events-table} (
 
 create table if not exists {snapshots-table} (
 	id serial primary key,
+	timestamp timestamptz not null,
 	aggregateID int not null,
 	sequence integer not null,
 	snapshotType varchar(255) not null,

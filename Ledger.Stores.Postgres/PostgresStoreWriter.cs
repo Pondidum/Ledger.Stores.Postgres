@@ -37,7 +37,7 @@ namespace Ledger.Stores.Postgres
 
 		public void SaveEvents(IEnumerable<IDomainEvent<TKey>> changes)
 		{
-			var sql = _getEvents("insert into {table} (aggregateID, sequence, eventType, event) values (@id, @sequence, @eventType, @event::json);");
+			var sql = _getEvents("insert into {table} (timestamp, aggregateID, sequence, eventType, event) values (clock_timestamp(), @id, @sequence, @eventType, @event::json);");
 
 			foreach (var change in changes)
 			{
@@ -55,7 +55,7 @@ namespace Ledger.Stores.Postgres
 
 		public void SaveSnapshot(ISnapshot<TKey> snapshot)
 		{
-			var sql = _getSnapshots("insert into {table} (aggregateID, sequence, snapshotType, snapshot) values (@id, @sequence, @snapshotType, @snapshot::json);");
+			var sql = _getSnapshots("insert into {table} (timestamp, aggregateID, sequence, snapshotType, snapshot) values (clock_timestamp(), @id, @sequence, @snapshotType, @snapshot::json);");
 
 			var dto = new
 			{
