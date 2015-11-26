@@ -36,12 +36,12 @@
       <HintPath>..\packages\Dapper.1.42\lib\net45\Dapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ledger, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ledger.5.0.0\lib\net40\Ledger.dll</HintPath>
+    <Reference Include="Ledger, Version=6.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ledger.6.0.1\lib\net40\Ledger.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Ledger.Acceptance, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ledger.Acceptance.5.0.0\lib\net40\Ledger.Acceptance.dll</HintPath>
+      <HintPath>..\packages\Ledger.Acceptance.6.0.1\lib\net40\Ledger.Acceptance.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">

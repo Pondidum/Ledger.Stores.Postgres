@@ -10,6 +10,12 @@ namespace Ledger.Stores.Postgres.Tests
 		public Acceptance(PostgresFixture fixture)
 			: base(new PostgresEventStore(fixture.Connection))
 		{
+
+			var snapshotted = new CreateGuidAggregateTablesCommand(fixture.Connection);
+			snapshotted.Execute(SnapshotStream);
+
+			var normal = new CreateGuidAggregateTablesCommand(fixture.Connection);
+			normal.Execute(DefaultStream);
 		}
 	}
 }

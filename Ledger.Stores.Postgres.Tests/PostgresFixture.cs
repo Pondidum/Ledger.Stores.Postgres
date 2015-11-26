@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Data;
-using Ledger.Acceptance.TestObjects;
-using Ledger.Conventions;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres.Tests
@@ -9,6 +7,8 @@ namespace Ledger.Stores.Postgres.Tests
 	public class PostgresFixture : IDisposable
 	{
 		public const string ConnectionString = "PORT=5432;TIMEOUT=15;POOLING=True;MINPOOLSIZE=1;MAXPOOLSIZE=20;COMMANDTIMEOUT=20;COMPATIBLE=2.1.3.0;HOST=192.168.99.100;USER ID=postgres;PASSWORD=postgres;DATABASE=postgres";
+		public const string StreamName = "TestStream";
+
 		public NpgsqlConnection Connection { get; set; }
 
 		public PostgresFixture()
@@ -18,7 +18,7 @@ namespace Ledger.Stores.Postgres.Tests
 			Connection.Open();
 			
 			var create = new CreateGuidAggregateTablesCommand(Connection);
-			create.Execute(new StoreConventions(new KeyTypeNamingConvention(), typeof(Guid), typeof(TestAggregate)));
+			create.Execute(StreamName);
 		}
 
 		public void Dispose()

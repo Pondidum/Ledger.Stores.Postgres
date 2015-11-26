@@ -49,6 +49,14 @@ namespace Ledger.Stores.Postgres
 				.FirstOrDefault();
 		}
 
+		public IEnumerable<TKey> LoadAllKeys()
+		{
+			var sql = _getEvents("select distinct aggregateID from {table} order by timestamp");
+
+			return _connection
+				.Query<TKey>(sql);
+		}
+
 		public void Dispose()
 		{
 			_transaction.Commit();

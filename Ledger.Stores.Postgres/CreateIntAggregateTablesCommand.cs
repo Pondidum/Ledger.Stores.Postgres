@@ -32,14 +32,13 @@ create table if not exists {snapshots-table} (
 			_connection = connection;
 		}
 
-		public void Execute(IStoreConventions conventions)
+		public void Execute(string stream)
 		{
 			var sql = Sql
-				.Replace("{events-table}", conventions.EventStoreName())
-				.Replace("{snapshots-table}", conventions.SnapshotStoreName());
+				.Replace("{events-table}", stream + "_events")
+				.Replace("{snapshots-table}", stream + "_snapshots");
 
 			_connection.Execute(sql);
-
 		}
 	}
 }

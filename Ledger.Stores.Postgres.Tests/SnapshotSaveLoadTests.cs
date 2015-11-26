@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
 using Ledger.Acceptance.TestDomain;
-using Ledger.Acceptance.TestObjects;
-using Ledger.Conventions;
 using Shouldly;
 using Xunit;
 
@@ -12,12 +9,10 @@ namespace Ledger.Stores.Postgres.Tests
 	public class SnapshotSaveLoadTests
 	{
 		private readonly PostgresEventStore _store;
-		private readonly StoreConventions _conventions;
 
 		public SnapshotSaveLoadTests(PostgresFixture fixture)
 		{
 			_store = new PostgresEventStore(fixture.Connection);
-			_conventions = new StoreConventions(new KeyTypeNamingConvention(), typeof(Guid), typeof(TestAggregate));
 		}
 
 		[RequiresPostgresFact]
@@ -25,7 +20,7 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(_conventions))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 0});
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 1});
@@ -33,7 +28,7 @@ namespace Ledger.Stores.Postgres.Tests
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 3});
 			}
 
-			var loaded = _store.CreateReader<Guid>(_conventions).LoadLatestSnapshotFor(id);
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadLatestSnapshotFor(id);
 
 			loaded.ShouldBeOfType<CandidateMemento>();
 		}
@@ -43,13 +38,13 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(_conventions))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4});
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5});
 			}
 			_store
-				.CreateReader<Guid>(_conventions)
+				.CreateReader<Guid>(PostgresFixture.StreamName)
 				.LoadLatestSnapshotFor(id)
 				.Sequence
 				.ShouldBe(5);
@@ -60,7 +55,7 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(_conventions))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4});
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5});
@@ -77,7 +72,7 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			var loaded = _store.CreateReader<Guid>(_conventions).LoadLatestSnapshotFor(id);
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadLatestSnapshotFor(id);
 
 			loaded.ShouldBe(null);
 		}

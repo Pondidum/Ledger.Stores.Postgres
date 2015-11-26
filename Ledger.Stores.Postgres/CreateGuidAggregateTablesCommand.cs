@@ -1,6 +1,4 @@
-﻿using System;
-using Dapper;
-using Ledger.Conventions;
+﻿using Dapper;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres
@@ -35,11 +33,11 @@ create table if not exists {snapshots-table} (
 			_connection = connection;
 		}
 
-		public void Execute(IStoreConventions conventions)
+		public void Execute(string stream)
 		{
 			var sql = Sql
-				.Replace("{events-table}", conventions.EventStoreName())
-				.Replace("{snapshots-table}", conventions.SnapshotStoreName());
+				.Replace("{events-table}", TableBuilder.EventsName(stream))
+				.Replace("{snapshots-table}", TableBuilder.SnapshotsName(stream));
 
 			_connection.Execute(sql);
 		}

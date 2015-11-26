@@ -12,7 +12,7 @@ namespace Ledger.Stores.Postgres
 			_connection = connection;
 		}
 
-		public IStoreReader<TKey> CreateReader<TKey>(IStoreConventions storeConventions)
+		public IStoreReader<TKey> CreateReader<TKey>(string stream)
 		{
 			var connection = _connection.Clone();
 
@@ -24,12 +24,12 @@ namespace Ledger.Stores.Postgres
 			return new PostgresStoreReader<TKey>(
 				connection,
 				transaction,
-				sql => Events(storeConventions, sql),
-				sql => Snapshots(storeConventions, sql)
+				sql => Events(stream, sql),
+				sql => Snapshots(stream, sql)
 			);
 		}
 
-		public IStoreWriter<TKey> CreateWriter<TKey>(IStoreConventions storeConventions)
+		public IStoreWriter<TKey> CreateWriter<TKey>(string stream)
 		{
 			var connection = _connection.Clone();
 
@@ -41,19 +41,19 @@ namespace Ledger.Stores.Postgres
 			return new PostgresStoreWriter<TKey>(
 				connection,
 				transaction,
-				sql => Events(storeConventions, sql),
-				sql => Snapshots(storeConventions, sql)
+				sql => Events(stream, sql),
+				sql => Snapshots(stream, sql)
 			);
 		}
 
-		private string Events(IStoreConventions conventions, string sql)
+		private string Events(string stream, string sql)
 		{
-			return sql.Replace("{table}", conventions.EventStoreName());
+			return sql.Replace("{table}", TableBuilder.EventsName(stream));
 		}
 
-		private string Snapshots(IStoreConventions conventions, string sql)
+		private string Snapshots(string stream, string sql)
 		{
-			return sql.Replace("{table}", conventions.SnapshotStoreName());
+			return sql.Replace("{table}", TableBuilder.SnapshotsName(stream));
 		}
 	}
 }
