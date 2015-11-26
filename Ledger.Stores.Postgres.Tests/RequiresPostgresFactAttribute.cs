@@ -23,7 +23,7 @@ namespace Ledger.Stores.Postgres.Tests
 			{
 				try
 				{
-					var builder = new NpgsqlConnectionStringBuilder(PostgresTestBase.ConnectionString);
+					var builder = new NpgsqlConnectionStringBuilder(PostgresFixture.ConnectionString);
 					builder.Timeout = 1000;
 
 					using (var connection = new NpgsqlConnection(builder.ToString()))

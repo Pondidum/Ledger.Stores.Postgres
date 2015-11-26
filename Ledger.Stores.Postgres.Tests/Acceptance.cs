@@ -1,12 +1,14 @@
 ﻿using Ledger.Acceptance;
 using Npgsql;
+using Xunit;
 
 namespace Ledger.Stores.Postgres.Tests
 {
+	[Collection("Postgres Collection")]
 	public class Acceptance : AcceptanceTests
 	{
-		public Acceptance()
-			: base(new PostgresEventStore(new NpgsqlConnection(PostgresTestBase.ConnectionString)))
+		public Acceptance(PostgresFixture fixture)
+			: base(new PostgresEventStore(fixture.Connection))
 		{
 		}
 	}

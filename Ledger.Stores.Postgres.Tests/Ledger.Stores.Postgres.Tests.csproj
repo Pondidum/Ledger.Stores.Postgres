@@ -86,8 +86,9 @@
   <ItemGroup>
     <Compile Include="Acceptance.cs" />
     <Compile Include="EventSaveLoadTests.cs" />
+    <Compile Include="PostgresCollection.cs" />
     <Compile Include="PostgresStoreWriterTests.cs" />
-    <Compile Include="PostgresTestBase.cs" />
+    <Compile Include="PostgresFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequiresPostgresFactAttribute.cs" />
     <Compile Include="Scratchpad.cs" />

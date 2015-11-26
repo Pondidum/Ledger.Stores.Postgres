@@ -8,14 +8,15 @@ using Xunit;
 
 namespace Ledger.Stores.Postgres.Tests
 {
-	public class EventSaveLoadTests : PostgresTestBase
+	[Collection("Postgres Collection")]
+	public class EventSaveLoadTests
 	{
 		private readonly PostgresEventStore _store;
 		private readonly StoreConventions _conventions;
 
-		public EventSaveLoadTests()
+		public EventSaveLoadTests(PostgresFixture fixture)
 		{
-			_store = new PostgresEventStore(Connection);
+			_store = new PostgresEventStore(fixture.Connection);
 			_conventions = new StoreConventions(new KeyTypeNamingConvention(), typeof(Guid), typeof(TestAggregate));
 		}
 
