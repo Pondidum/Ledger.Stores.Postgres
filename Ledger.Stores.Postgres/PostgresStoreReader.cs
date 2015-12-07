@@ -23,25 +23,25 @@ namespace Ledger.Stores.Postgres
 
 		public IEnumerable<IDomainEvent<TKey>> LoadEvents(TKey aggregateID)
 		{
-			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id order by sequence asc");
+			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id order by stamp asc");
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
 				.Select(e => e.Process());
 		}
 
-		public IEnumerable<IDomainEvent<TKey>> LoadEventsSince(TKey aggregateID, int sequenceID)
+		public IEnumerable<IDomainEvent<TKey>> LoadEventsSince(TKey aggregateID, DateTime stamp)
 		{
-			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id and sequence > @last order by sequence asc");
+			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id and stamp > @last order by stamp asc");
 
 			return _connection
-				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = sequenceID }, _transaction)
+				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = stamp }, _transaction)
 				.Select(e => e.Process());
 		}
 
 		public ISnapshot<TKey> LoadLatestSnapshotFor(TKey aggregateID)
 		{
-			var sql = _getSnapshots("select snapshotType, snapshot from {table} where aggregateID = @id order by sequence desc limit 1");
+			var sql = _getSnapshots("select snapshotType, snapshot from {table} where aggregateID = @id order by stamp desc limit 1");
 
 			return _connection
 				.Query<SnapshotDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
@@ -51,7 +51,7 @@ namespace Ledger.Stores.Postgres
 
 		public IEnumerable<TKey> LoadAllKeys()
 		{
-			var sql = _getEvents("select distinct aggregateID from {table} order by timestamp");
+			var sql = _getEvents("select distinct aggregateID from {table} order by stamp");
 
 			return _connection
 				.Query<TKey>(sql);

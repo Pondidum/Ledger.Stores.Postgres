@@ -1,5 +1,4 @@
 ﻿using Ledger.Acceptance;
-using Npgsql;
 using Xunit;
 
 namespace Ledger.Stores.Postgres.Tests
@@ -16,6 +15,10 @@ namespace Ledger.Stores.Postgres.Tests
 
 			var normal = new CreateGuidAggregateTablesCommand(fixture.Connection);
 			normal.Execute(DefaultStream);
+
+			fixture.DropOnDispose(SnapshotStream);
+			fixture.DropOnDispose(DefaultStream);
+
 		}
 	}
 }

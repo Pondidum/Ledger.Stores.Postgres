@@ -20,7 +20,7 @@ namespace Ledger.Stores.Postgres.Tests
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
 				writer
-					.GetLatestSequenceFor(Guid.NewGuid())
+					.GetLatestStampFor(Guid.NewGuid())
 					.ShouldBe(null);
 			}
 		}
@@ -31,8 +31,8 @@ namespace Ledger.Stores.Postgres.Tests
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
 				writer
-					.GetLatestSnapshotSequenceFor(Guid.NewGuid())
-					.ShouldBe(null);
+					.GetNumberOfEventsSinceSnapshotFor(Guid.NewGuid())
+					.ShouldBe(0);
 			}
 		}
 	}

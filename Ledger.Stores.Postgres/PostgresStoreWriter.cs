@@ -21,30 +21,30 @@ namespace Ledger.Stores.Postgres
 			_getSnapshots = getSnapshots;
 		}
 
-		public int? GetLatestSequenceFor(TKey aggregateID)
+		public DateTime? GetLatestStampFor(TKey aggregateID)
 		{
-			var sql = _getEvents("select max(sequence) from {table} where aggregateID = @id");
+			var sql = _getEvents("select max(stamp) from {table} where aggregateID = @id");
 
-			return _connection.ExecuteScalar<int?>(sql, new { ID = aggregateID }, _transaction);
+			return _connection.ExecuteScalar<DateTime?>(sql, new { ID = aggregateID }, _transaction);
 		}
 
-		public int? GetLatestSnapshotSequenceFor(TKey aggregateID)
+		public int GetNumberOfEventsSinceSnapshotFor(TKey aggregateID)
 		{
-			var sql = _getSnapshots("select max(sequence) from {table} where aggregateID = @id");
+			var sql = _getSnapshots("select max(stamp) from {table} where aggregateID = @id");
 
-			return _connection.ExecuteScalar<int?>(sql, new { ID = aggregateID }, _transaction);
+			return _connection.ExecuteScalar<int>(sql, new { ID = aggregateID }, _transaction);
 		}
 
 		public void SaveEvents(IEnumerable<IDomainEvent<TKey>> changes)
 		{
-			var sql = _getEvents("insert into {table} (timestamp, aggregateID, sequence, eventType, event) values (clock_timestamp(), @id, @sequence, @eventType, @event::json);");
+			var sql = _getEvents("insert into {table} (aggregateID, stamp, eventType, event) values (@id, @stamp, @eventType, @event::json);");
 
 			foreach (var change in changes)
 			{
 				var dto = new
 				{
 					ID = change.AggregateID,
-					Sequence = change.Sequence,
+					Stamp = change.Stamp,
 					EventType = change.GetType().AssemblyQualifiedName,
 					Event = JsonConvert.SerializeObject(change)
 				};
@@ -55,12 +55,12 @@ namespace Ledger.Stores.Postgres
 
 		public void SaveSnapshot(ISnapshot<TKey> snapshot)
 		{
-			var sql = _getSnapshots("insert into {table} (timestamp, aggregateID, sequence, snapshotType, snapshot) values (clock_timestamp(), @id, @sequence, @snapshotType, @snapshot::json);");
+			var sql = _getSnapshots("insert into {table} (aggregateID, stamp, snapshotType, snapshot) values (@id, @stamp, @snapshotType, @snapshot::json);");
 
 			var dto = new
 			{
 				ID = snapshot.AggregateID,
-				Sequence = snapshot.Sequence,
+				Stamp = snapshot.Stamp,
 				SnapshotType = snapshot.GetType().AssemblyQualifiedName,
 				Snapshot = JsonConvert.SerializeObject(snapshot)
 			};

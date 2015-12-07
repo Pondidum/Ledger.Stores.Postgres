@@ -1,4 +1,5 @@
 ﻿using System;
+using Ledger.Acceptance;
 using Ledger.Acceptance.TestDomain;
 using Shouldly;
 using Xunit;
@@ -9,10 +10,12 @@ namespace Ledger.Stores.Postgres.Tests
 	public class SnapshotSaveLoadTests
 	{
 		private readonly PostgresEventStore _store;
+		private readonly IncrementingStamper _stamper;
 
 		public SnapshotSaveLoadTests(PostgresFixture fixture)
 		{
 			_store = new PostgresEventStore(fixture.Connection);
+			_stamper = new IncrementingStamper();
 		}
 
 		[RequiresPostgresFact]
@@ -22,10 +25,10 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 0});
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 1});
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 2});
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 3});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(0) });
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(1) });
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(2) });
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(3) });
 			}
 
 			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadLatestSnapshotFor(id);
@@ -40,32 +43,15 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
 			{
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4});
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5});
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(4) });
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(5) });
 			}
 			_store
 				.CreateReader<Guid>(PostgresFixture.StreamName)
 				.LoadLatestSnapshotFor(id)
-				.Sequence
-				.ShouldBe(5);
+				.Stamp
+				.ShouldMatch(_stamper.Offset(5));
 		}
-
-		[RequiresPostgresFact]
-		public void The_most_recent_snapshot_id_should_be_found()
-		{
-			var id = Guid.NewGuid();
-
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
-			{
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4});
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5});
-
-				writer
-					.GetLatestSnapshotSequenceFor(id)
-					.ShouldBe(5);
-			}
-		}
-
 
 		[RequiresPostgresFact]
 		public void When_there_is_no_snapshot_file_and_load_is_called()
