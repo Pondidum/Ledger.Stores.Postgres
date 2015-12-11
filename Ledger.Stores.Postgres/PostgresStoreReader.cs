@@ -57,6 +57,15 @@ namespace Ledger.Stores.Postgres
 				.Query<TKey>(sql);
 		}
 
+		public IEnumerable<IDomainEvent<TKey>> LoadAllEvents()
+		{
+			var sql = _getEvents("select eventType, event from {table} order by stamp asc");
+
+			return _connection
+				.Query<EventDto<TKey>>(sql, _transaction, buffered: false)
+				.Select(e => e.Process());
+		}
+
 		public void Dispose()
 		{
 			_transaction.Commit();

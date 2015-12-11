@@ -88,6 +88,7 @@
     <Compile Include="EventSaveLoadTests.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="PostgresCollection.cs" />
+    <Compile Include="PostgresStoreReaderTests.cs" />
     <Compile Include="PostgresStoreWriterTests.cs" />
     <Compile Include="PostgresFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
