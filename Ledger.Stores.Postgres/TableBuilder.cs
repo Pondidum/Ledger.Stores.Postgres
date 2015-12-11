@@ -22,15 +22,13 @@ namespace Ledger.Stores.Postgres
 		{
 			Action<string> create;
 
-			if (_creators.TryGetValue(keyType, out create))
+			if (_creators.TryGetValue(keyType, out create) == false)
 			{
-				create(stream);
+				var supported = string.Join(", ", _creators.Keys.Select(k => k.Name));
+				throw new NotSupportedException($"Cannot create a '{keyType.Name}' aggregate keyed table, only '{supported}' are supported.");
 			}
 
-			throw new NotSupportedException(string.Format(
-				"Cannot create a '{0}' aggregate keyed table, only '{1}' are supported.", 
-				keyType.Name,
-				string.Join(", ", _creators.Keys.Select(k => k.Name))));
+			create(stream);
 		}
 
 		public static string EventsName(string stream)
