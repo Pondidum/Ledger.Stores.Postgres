@@ -2,7 +2,7 @@ version: '{build}'
 build_script:
 - npm install -g gulp
 - npm install
-- gulp --mode Release
+- gulp --mode Release --noacceptance true
 test: off
 artifacts:
 - path: build\deploy\*.nupkg

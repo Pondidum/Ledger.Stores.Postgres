@@ -16,7 +16,8 @@ var config = {
   mode: args.mode || "Debug",
   commit: process.env.APPVEYOR_REPO_COMMIT || "0",
   buildNumber: process.env.APPVEYOR_BUILD_VERSION || "0",
-  output: "./build/deploy"
+  output: "./build/deploy",
+  noacceptance: args.noacceptance || "false"
 }
 
 gulp.task("default", [ "restore", "version", "compile", "test", "pack" ]);
@@ -58,7 +59,7 @@ gulp.task('test', [ "compile" ], function() {
     .pipe(xunit({
       executable: './tools/xunit/xunit.console.exe',
       options: {
-        quiet: true
+        notrait: 'acceptance=' + config.noacceptance
       }
     }));
 });
