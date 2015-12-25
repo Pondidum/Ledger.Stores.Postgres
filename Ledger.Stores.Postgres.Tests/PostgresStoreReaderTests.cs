@@ -64,7 +64,7 @@ namespace Ledger.Stores.Postgres.Tests
 			}
 		}
 
-		[Fact]
+		[RequiresPostgresFact]
 		public void When_loading_all_events()
 		{
 			using (var reader = _store.CreateReader<Guid>("ImportStream"))
