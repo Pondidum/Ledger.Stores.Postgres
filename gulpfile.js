@@ -59,6 +59,7 @@ gulp.task('test', [ "compile" ], function() {
     .pipe(xunit({
       executable: './packages/xunit.runner.console.2.1.0/tools/xunit.console.exe',
       options: {
+        notrait: 'acceptance=' + config.noacceptance,
         verbose: true,
         nologo: true,
       }
