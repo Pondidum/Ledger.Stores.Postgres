@@ -12,7 +12,7 @@ namespace Ledger.Stores.Postgres
 			_connection = connection;
 		}
 
-		public IStoreReader<TKey> CreateReader<TKey>(string stream)
+		public IStoreReader<TKey> CreateReader<TKey>(EventStoreContext context)
 		{
 			var connection = _connection.Clone();
 
@@ -24,12 +24,12 @@ namespace Ledger.Stores.Postgres
 			return new PostgresStoreReader<TKey>(
 				connection,
 				transaction,
-				sql => Events(stream, sql),
-				sql => Snapshots(stream, sql)
+				sql => Events(context.StreamName, sql),
+				sql => Snapshots(context.StreamName, sql)
 			);
 		}
 
-		public IStoreWriter<TKey> CreateWriter<TKey>(string stream)
+		public IStoreWriter<TKey> CreateWriter<TKey>(EventStoreContext context)
 		{
 			var connection = _connection.Clone();
 
@@ -41,8 +41,8 @@ namespace Ledger.Stores.Postgres
 			return new PostgresStoreWriter<TKey>(
 				connection,
 				transaction,
-				sql => Events(stream, sql),
-				sql => Snapshots(stream, sql)
+				sql => Events(context.StreamName, sql),
+				sql => Snapshots(context.StreamName, sql)
 			);
 		}
 

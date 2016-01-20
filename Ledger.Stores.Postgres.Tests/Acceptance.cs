@@ -11,13 +11,13 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 
 			var snapshotted = new CreateGuidAggregateTablesCommand(fixture.Connection);
-			snapshotted.Execute(SnapshotStream);
+			snapshotted.Execute(SnapshotStream.StreamName);
 
 			var normal = new CreateGuidAggregateTablesCommand(fixture.Connection);
-			normal.Execute(DefaultStream);
+			normal.Execute(DefaultStream.StreamName);
 
-			fixture.DropOnDispose(SnapshotStream);
-			fixture.DropOnDispose(DefaultStream);
+			fixture.DropOnDispose(SnapshotStream.StreamName);
+			fixture.DropOnDispose(DefaultStream.StreamName);
 
 		}
 	}

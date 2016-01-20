@@ -17,7 +17,7 @@ namespace Ledger.Stores.Postgres.Tests
 		[RequiresPostgresFact]
 		public void GetLatestSequenceFor_can_return_null()
 		{
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer
 					.GetLatestStampFor(Guid.NewGuid())
@@ -28,7 +28,7 @@ namespace Ledger.Stores.Postgres.Tests
 		[RequiresPostgresFact]
 		public void GetLatestSnapshotSequenceFor_can_return_null()
 		{
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer
 					.GetNumberOfEventsSinceSnapshotFor(Guid.NewGuid())

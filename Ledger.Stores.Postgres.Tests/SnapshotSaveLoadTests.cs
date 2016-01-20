@@ -23,7 +23,7 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(0) });
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(1) });
@@ -31,7 +31,7 @@ namespace Ledger.Stores.Postgres.Tests
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(3) });
 			}
 
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadLatestSnapshotFor(id);
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadLatestSnapshotFor(id);
 
 			loaded.ShouldBeOfType<CandidateMemento>();
 		}
@@ -41,13 +41,13 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(4) });
 				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Stamp = _stamper.Offset(5) });
 			}
 			_store
-				.CreateReader<Guid>(PostgresFixture.StreamName)
+				.CreateReader<Guid>(PostgresFixture.TestContext)
 				.LoadLatestSnapshotFor(id)
 				.Stamp
 				.ShouldMatch(_stamper.Offset(5));
@@ -58,7 +58,7 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			var id = Guid.NewGuid();
 
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadLatestSnapshotFor(id);
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadLatestSnapshotFor(id);
 
 			loaded.ShouldBe(null);
 		}

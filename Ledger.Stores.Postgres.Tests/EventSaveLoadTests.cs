@@ -29,12 +29,12 @@ namespace Ledger.Stores.Postgres.Tests
 				new FixNameSpelling {AggregateID = id, Stamp = _stamper.GetNext(), NewName = "Fix"},
 			};
 
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer.SaveEvents(toSave);
 			}
 
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadEvents(id);
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEvents(id);
 
 			loaded.First().ShouldBeOfType<NameChangedByDeedPoll>();
 			loaded.Last().ShouldBeOfType<FixNameSpelling>();
@@ -46,13 +46,13 @@ namespace Ledger.Stores.Postgres.Tests
 			var first = Guid.NewGuid();
 			var second = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, NewName = "Fix" } });
 				writer.SaveEvents(new[] { new NameChangedByDeedPoll { AggregateID = second, NewName = "Deed" } });
 			}
 
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadEvents(first);
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEvents(first);
 
 			loaded.Single().ShouldBeOfType<FixNameSpelling>();
 		}
@@ -63,7 +63,7 @@ namespace Ledger.Stores.Postgres.Tests
 			var first = Guid.NewGuid();
 			var second = Guid.NewGuid();
 
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, Stamp = _stamper.Offset(4) } });
 				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, Stamp = _stamper.Offset(5) } });
@@ -87,12 +87,12 @@ namespace Ledger.Stores.Postgres.Tests
 				new FixNameSpelling { AggregateID = id, Stamp = _stamper.Offset(6) },
 			};
 
-			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.StreamName))
+			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
 				writer.SaveEvents(toSave);
 			}
 
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadEventsSince(id, _stamper.Offset(4));
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEventsSince(id, _stamper.Offset(4));
 
 			loaded.Select(x => x.Stamp).ShouldBe(new[] { _stamper.Offset(5), _stamper.Offset(6) });
 		}
@@ -101,7 +101,7 @@ namespace Ledger.Stores.Postgres.Tests
 		public void When_there_are_no_events_and_load_is_called()
 		{
 			var id = Guid.NewGuid();
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.StreamName).LoadEventsSince(id, _stamper.Offset(4));
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEventsSince(id, _stamper.Offset(4));
 
 			loaded.ShouldBeEmpty();
 		}

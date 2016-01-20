@@ -67,7 +67,8 @@ namespace Ledger.Stores.Postgres.Tests
 		[RequiresPostgresFact]
 		public void When_loading_all_events()
 		{
-			using (var reader = _store.CreateReader<Guid>("ImportStream"))
+			var context = new EventStoreContext("ImportStream", Default.SerializerSettings);
+			using (var reader = _store.CreateReader<Guid>(context))
 			{
 				//15 -> 20 seconds
 				Should.CompleteIn(() => reader.LoadAllEvents().Count().ShouldBe(1000000), TimeSpan.FromSeconds(20));
