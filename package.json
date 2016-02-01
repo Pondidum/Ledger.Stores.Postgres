@@ -1,6 +1,6 @@
 {
   "name": "Ledger.Stores.Postgres",
-  "version": "8.2.0",
+  "version": "8.3.0",
   "dependencies": {
     "gulp": "^3.9.0",
     "gulp-debug": "^2.1.2",

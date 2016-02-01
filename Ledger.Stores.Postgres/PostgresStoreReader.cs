@@ -30,12 +30,12 @@ namespace Ledger.Stores.Postgres
 				.Select(e => e.Process());
 		}
 
-		public IEnumerable<IDomainEvent<TKey>> LoadEventsSince(TKey aggregateID, DateTime stamp)
+		public IEnumerable<IDomainEvent<TKey>> LoadEventsSince(TKey aggregateID, DateTime? stamp)
 		{
 			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id and stamp > @last order by stamp asc");
 
 			return _connection
-				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = stamp }, _transaction)
+				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = stamp ?? DateTime.MinValue }, _transaction)
 				.Select(e => e.Process());
 		}
 
