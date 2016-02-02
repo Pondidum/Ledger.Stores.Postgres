@@ -21,27 +21,27 @@ namespace Ledger.Stores.Postgres
 			_getSnapshots = getSnapshots;
 		}
 
-		public IEnumerable<IDomainEvent<TKey>> LoadEvents(TKey aggregateID)
+		public IEnumerable<DomainEvent<TKey>> LoadEvents(TKey aggregateID)
 		{
-			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id order by stamp asc");
+			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id order by sequence asc");
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
 				.Select(e => e.Process());
 		}
 
-		public IEnumerable<IDomainEvent<TKey>> LoadEventsSince(TKey aggregateID, DateTime? stamp)
+		public IEnumerable<DomainEvent<TKey>> LoadEventsSince(TKey aggregateID, DateTime? stamp)
 		{
-			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id and stamp > @last order by stamp asc");
+			var sql = _getEvents("select eventType, event from {table} where aggregateID = @id and stamp > @last order by sequence asc");
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = stamp ?? DateTime.MinValue }, _transaction)
 				.Select(e => e.Process());
 		}
 
-		public ISnapshot<TKey> LoadLatestSnapshotFor(TKey aggregateID)
+		public Snapshot<TKey> LoadLatestSnapshotFor(TKey aggregateID)
 		{
-			var sql = _getSnapshots("select snapshotType, snapshot from {table} where aggregateID = @id order by stamp desc limit 1");
+			var sql = _getSnapshots("select snapshotType, snapshot from {table} where aggregateID = @id order by sequence  desc limit 1");
 
 			return _connection
 				.Query<SnapshotDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
@@ -51,15 +51,15 @@ namespace Ledger.Stores.Postgres
 
 		public IEnumerable<TKey> LoadAllKeys()
 		{
-			var sql = _getEvents("select distinct aggregateID from {table} order by stamp");
+			var sql = _getEvents("select distinct aggregateID from {table} order by sequence");
 
 			return _connection
 				.Query<TKey>(sql);
 		}
 
-		public IEnumerable<IDomainEvent<TKey>> LoadAllEvents()
+		public IEnumerable<DomainEvent<TKey>> LoadAllEvents()
 		{
-			var sql = _getEvents("select eventType, event from {table} order by stamp asc");
+			var sql = _getEvents("select eventType, event from {table} order by sequence asc");
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, _transaction, buffered: false)

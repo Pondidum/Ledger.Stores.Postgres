@@ -48,12 +48,16 @@ namespace Ledger.Stores.Postgres
 
 		private string Events(string stream, string sql)
 		{
-			return sql.Replace("{table}", TableBuilder.EventsName(stream));
+			return sql
+				.Replace("{table}", TableBuilder.EventsName(stream))
+				.Replace("{events_table}", TableBuilder.EventsName(stream));
 		}
 
 		private string Snapshots(string stream, string sql)
 		{
-			return sql.Replace("{table}", TableBuilder.SnapshotsName(stream));
+			return sql
+				.Replace("{table}", TableBuilder.SnapshotsName(stream))
+				.Replace("{snapshots_table}", TableBuilder.SnapshotsName(stream));
 		}
 	}
 }

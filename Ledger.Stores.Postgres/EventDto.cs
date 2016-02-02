@@ -8,9 +8,9 @@ namespace Ledger.Stores.Postgres
 		public string EventType { get; set; }
 		public string Event { get; set; }
 
-		public IDomainEvent<TKey> Process()
+		public DomainEvent<TKey> Process()
 		{
-			return (IDomainEvent<TKey>)JsonConvert.DeserializeObject(Event, Type.GetType(EventType));
+			return (DomainEvent<TKey>)JsonConvert.DeserializeObject(Event, Type.GetType(EventType));
 		}
 	}
 }

@@ -35,12 +35,14 @@ namespace Ledger.Stores.Postgres.Tests
 
 				var events = Enumerable
 					.Range(0, 1000000)
-					.Select(i => new TestEvent { AggregateID = id, Stamp = DefaultStamper.Now() });
+					.Select(i => new TestEvent { AggregateID = id, Sequence = i, Stamp = DefaultStamper.Now() });
 
+				using (var transaciton = connection.BeginTransaction())
 				using (var command = connection.CreateCommand())
 				{
-					command.CommandText = "COPY importstream_events(aggregateid, stamp, eventtype, event) from STDIN;";
+					command.CommandText = "COPY importstream_events(aggregateid, stamp, sequence, eventtype, event) from STDIN;";
 					command.CommandTimeout = 600000;
+					command.Transaction = transaciton;
 
 					var serializer = new NpgsqlCopySerializer(connection);
 					var copy = new NpgsqlCopyIn(command, connection, serializer.ToStream);
@@ -51,6 +53,7 @@ namespace Ledger.Stores.Postgres.Tests
 					{
 						serializer.AddString(@event.AggregateID.ToString());
 						serializer.AddDateTime(@event.Stamp);
+						serializer.AddInt32(@event.Sequence);
 						serializer.AddString(@event.GetType().AssemblyQualifiedName);
 						serializer.AddString(JsonConvert.SerializeObject(@event));
 
@@ -60,6 +63,8 @@ namespace Ledger.Stores.Postgres.Tests
 
 					copy.End();
 					serializer.Close();
+
+					transaciton.Commit();
 				}
 			}
 		}
