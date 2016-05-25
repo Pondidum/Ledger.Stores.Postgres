@@ -12,13 +12,15 @@ namespace Ledger.Stores.Postgres
 		private readonly NpgsqlTransaction _transaction;
 		private readonly Func<string, string> _getEvents;
 		private readonly Func<string, string> _getSnapshots;
+		private readonly ITypeResolver _typeResolver;
 
-		public PostgresStoreReader(NpgsqlConnection connection, NpgsqlTransaction transaction, Func<string, string> getEvents, Func<string, string> getSnapshots)
+		public PostgresStoreReader(NpgsqlConnection connection, NpgsqlTransaction transaction, Func<string, string> getEvents, Func<string, string> getSnapshots, ITypeResolver typeResolver)
 		{
 			_connection = connection;
 			_transaction = transaction;
 			_getEvents = getEvents;
 			_getSnapshots = getSnapshots;
+			_typeResolver = typeResolver;
 		}
 
 		public IEnumerable<DomainEvent<TKey>> LoadEvents(TKey aggregateID)
@@ -27,7 +29,7 @@ namespace Ledger.Stores.Postgres
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
-				.Select(e => e.Process());
+				.Select(e => e.Process(_typeResolver));
 		}
 
 		public IEnumerable<DomainEvent<TKey>> LoadEventsSince(TKey aggregateID, DateTime? stamp)
@@ -36,7 +38,7 @@ namespace Ledger.Stores.Postgres
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, new { ID = aggregateID, Last = stamp ?? DateTime.MinValue }, _transaction)
-				.Select(e => e.Process());
+				.Select(e => e.Process(_typeResolver));
 		}
 
 		public Snapshot<TKey> LoadLatestSnapshotFor(TKey aggregateID)
@@ -45,7 +47,7 @@ namespace Ledger.Stores.Postgres
 
 			return _connection
 				.Query<SnapshotDto<TKey>>(sql, new { ID = aggregateID }, _transaction)
-				.Select(s => s.Process())
+				.Select(s => s.Process(_typeResolver))
 				.FirstOrDefault();
 		}
 
@@ -63,7 +65,7 @@ namespace Ledger.Stores.Postgres
 
 			return _connection
 				.Query<EventDto<TKey>>(sql, _transaction, buffered: false)
-				.Select(e => e.Process());
+				.Select(e => e.Process(_typeResolver));
 		}
 
 		public void Dispose()

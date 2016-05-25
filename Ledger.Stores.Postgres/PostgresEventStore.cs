@@ -25,7 +25,8 @@ namespace Ledger.Stores.Postgres
 				connection,
 				transaction,
 				sql => Events(context.StreamName, sql),
-				sql => Snapshots(context.StreamName, sql)
+				sql => Snapshots(context.StreamName, sql),
+				context.TypeResolver
 			);
 		}
 
