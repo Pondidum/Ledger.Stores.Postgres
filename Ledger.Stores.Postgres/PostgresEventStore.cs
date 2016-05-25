@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Newtonsoft.Json;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres
@@ -6,10 +7,16 @@ namespace Ledger.Stores.Postgres
 	public class PostgresEventStore : IEventStore
 	{
 		private readonly NpgsqlConnection _connection;
+		private readonly JsonSerializerSettings _jsonSettings;
 
 		public PostgresEventStore(NpgsqlConnection connection)
 		{
 			_connection = connection;
+
+			_jsonSettings = new JsonSerializerSettings
+			{
+				TypeNameHandling = TypeNameHandling.Auto
+			};
 		}
 
 		public IStoreReader<TKey> CreateReader<TKey>(EventStoreContext context)
@@ -26,6 +33,7 @@ namespace Ledger.Stores.Postgres
 				transaction,
 				sql => Events(context.StreamName, sql),
 				sql => Snapshots(context.StreamName, sql),
+				_jsonSettings,
 				context.TypeResolver
 			);
 		}
