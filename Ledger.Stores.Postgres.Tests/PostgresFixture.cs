@@ -8,7 +8,8 @@ namespace Ledger.Stores.Postgres.Tests
 {
 	public class PostgresFixture : IDisposable
 	{
-		public const string ConnectionString = "PORT=5432;TIMEOUT=60;POOLING=True;MINPOOLSIZE=1;MAXPOOLSIZE=20;COMMANDTIMEOUT=20;COMPATIBLE=2.1.3.0;HOST=192.168.99.100;USER ID=postgres;PASSWORD=postgres;DATABASE=postgres";
+		public const string ConnectionString = "PORT=5432;TIMEOUT=60;POOLING=True;MINPOOLSIZE=1;MAXPOOLSIZE=20;COMMANDTIMEOUT=20;COMPATIBLE=2.1.3.0;HOST=10.0.75.2;USER ID=postgres;PASSWORD=postgres;DATABASE=postgres";
+
 		public static readonly EventStoreContext TestContext = new EventStoreContext("TestStream", new DefaultTypeResolver());
 
 		public NpgsqlConnection Connection { get; set; }
