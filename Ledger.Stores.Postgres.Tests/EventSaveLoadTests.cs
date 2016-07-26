@@ -2,6 +2,7 @@
 using System.Linq;
 using Ledger.Acceptance;
 using Ledger.Acceptance.TestDomain.Events;
+using Ledger.Infrastructure;
 using Shouldly;
 using Xunit;
 
@@ -11,12 +12,10 @@ namespace Ledger.Stores.Postgres.Tests
 	public class EventSaveLoadTests
 	{
 		private readonly PostgresEventStore _store;
-		private readonly IncrementingStamper _stamper;
 
 		public EventSaveLoadTests(PostgresFixture fixture)
 		{
 			_store = new PostgresEventStore(fixture.Connection);
-			_stamper = new IncrementingStamper();
 		}
 
 		[RequiresPostgresFact]
@@ -25,8 +24,8 @@ namespace Ledger.Stores.Postgres.Tests
 			var id = Guid.NewGuid();
 			var toSave = new DomainEvent<Guid>[]
 			{
-				new NameChangedByDeedPoll { AggregateID = id, Stamp = _stamper.GetNext(), NewName = "Deed"},
-				new FixNameSpelling {AggregateID = id, Stamp = _stamper.GetNext(), NewName = "Fix"},
+				new NameChangedByDeedPoll { AggregateID = id, NewName = "Deed"},
+				new FixNameSpelling {AggregateID = id, NewName = "Fix"},
 			};
 
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
@@ -65,13 +64,13 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
-				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, Sequence = 4 } });
-				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, Sequence = 5 } });
-				writer.SaveEvents(new[] { new NameChangedByDeedPoll { AggregateID = second, Sequence = 6 } });
+				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, Sequence = 4.AsSequence() } });
+				writer.SaveEvents(new[] { new FixNameSpelling { AggregateID = first, Sequence = 5.AsSequence() } });
+				writer.SaveEvents(new[] { new NameChangedByDeedPoll { AggregateID = second, Sequence = 6.AsSequence() } });
 
 				writer
 					.GetLatestSequenceFor(first)
-					.ShouldBe(5);
+					.ShouldBe(5.AsSequence());
 			}
 		}
 
@@ -81,10 +80,10 @@ namespace Ledger.Stores.Postgres.Tests
 			var id = Guid.NewGuid();
 			var toSave = new DomainEvent<Guid>[]
 			{
-				new NameChangedByDeedPoll { AggregateID = id, Stamp = _stamper.Offset(3) },
-				new FixNameSpelling { AggregateID = id, Stamp = _stamper.Offset(4) },
-				new FixNameSpelling { AggregateID = id, Stamp = _stamper.Offset(5) },
-				new FixNameSpelling { AggregateID = id, Stamp = _stamper.Offset(6) },
+				new NameChangedByDeedPoll { AggregateID = id, Sequence = 3.AsSequence() },
+				new FixNameSpelling { AggregateID = id, Sequence = 4.AsSequence() },
+				new FixNameSpelling { AggregateID = id, Sequence = 5.AsSequence() },
+				new FixNameSpelling { AggregateID = id, Sequence = 6.AsSequence() },
 			};
 
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
@@ -92,16 +91,16 @@ namespace Ledger.Stores.Postgres.Tests
 				writer.SaveEvents(toSave);
 			}
 
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEventsSince(id, _stamper.Offset(4));
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEventsSince(id, 4.AsSequence());
 
-			loaded.Select(x => x.Stamp).ShouldBe(new[] { _stamper.Offset(5), _stamper.Offset(6) });
+			loaded.Select(x => x.Sequence).ShouldBe(new[] { 5.AsSequence(), 6.AsSequence() });
 		}
 
 		[RequiresPostgresFact]
 		public void When_there_are_no_events_and_load_is_called()
 		{
 			var id = Guid.NewGuid();
-			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEventsSince(id, _stamper.Offset(4));
+			var loaded = _store.CreateReader<Guid>(PostgresFixture.TestContext).LoadEventsSince(id, 4.AsSequence());
 
 			loaded.ShouldBeEmpty();
 		}

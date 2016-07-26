@@ -1,6 +1,7 @@
 ﻿using System;
 using Ledger.Acceptance;
 using Ledger.Acceptance.TestDomain;
+using Ledger.Infrastructure;
 using Shouldly;
 using Xunit;
 
@@ -43,8 +44,8 @@ namespace Ledger.Stores.Postgres.Tests
 
 			using (var writer = _store.CreateWriter<Guid>(PostgresFixture.TestContext))
 			{
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4, Stamp = _stamper.Offset(4) });
-				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5, Stamp = _stamper.Offset(5) });
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 4.AsSequence(), Stamp = _stamper.Offset(4) });
+				writer.SaveSnapshot(new CandidateMemento { AggregateID = id, Sequence = 5.AsSequence(), Stamp = _stamper.Offset(5) });
 			}
 			_store
 				.CreateReader<Guid>(PostgresFixture.TestContext)

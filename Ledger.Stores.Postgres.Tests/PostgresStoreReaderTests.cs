@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Ledger.Acceptance.TestObjects;
+using Ledger.Infrastructure;
 using Newtonsoft.Json;
 using Npgsql;
 using Shouldly;
@@ -35,12 +36,13 @@ namespace Ledger.Stores.Postgres.Tests
 
 				var events = Enumerable
 					.Range(0, 1000000)
-					.Select(i => new TestEvent { AggregateID = id, Sequence = i, Stamp = DefaultStamper.Now() });
+					.Select(i => i.AsSequence())
+					.Select(seq => new TestEvent { AggregateID = id, Sequence = seq, Stamp = DefaultStamper.Now() });
 
 				using (var transaciton = connection.BeginTransaction())
 				using (var command = connection.CreateCommand())
 				{
-					command.CommandText = "COPY importstream_events(aggregateid, stamp, sequence, eventtype, event) from STDIN;";
+					command.CommandText = "COPY importstream_events(aggregateid, sequence, eventtype, event) from STDIN;";
 					command.CommandTimeout = 600000;
 					command.Transaction = transaciton;
 
@@ -52,8 +54,7 @@ namespace Ledger.Stores.Postgres.Tests
 					foreach (var @event in events)
 					{
 						serializer.AddString(@event.AggregateID.ToString());
-						serializer.AddDateTime(@event.Stamp);
-						serializer.AddInt32(@event.Sequence);
+						serializer.AddInt32((int)@event.Sequence);
 						serializer.AddString(@event.GetType().AssemblyQualifiedName);
 						serializer.AddString(JsonConvert.SerializeObject(@event));
 

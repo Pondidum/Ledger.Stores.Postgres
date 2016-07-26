@@ -66,6 +66,8 @@
     <Compile Include="PostgresStoreReader.cs" />
     <Compile Include="PostgresStoreWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SequenceJsonConverter.cs" />
+    <Compile Include="SequenceTypeHandler.cs" />
     <Compile Include="SnapshotDto.cs" />
     <Compile Include="TableBuilder.cs" />
   </ItemGroup>

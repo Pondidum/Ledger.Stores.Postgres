@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
+using Dapper;
 using Newtonsoft.Json;
 using Npgsql;
 
@@ -6,6 +8,11 @@ namespace Ledger.Stores.Postgres
 {
 	public class PostgresEventStore : IEventStore
 	{
+		static PostgresEventStore()
+		{
+			SqlMapper.AddTypeHandler(new SequenceTypeHandler());
+		}
+
 		private readonly NpgsqlConnection _connection;
 		private readonly JsonSerializerSettings _jsonSettings;
 
@@ -15,7 +22,8 @@ namespace Ledger.Stores.Postgres
 
 			_jsonSettings = new JsonSerializerSettings
 			{
-				TypeNameHandling = TypeNameHandling.Auto
+				TypeNameHandling = TypeNameHandling.Auto,
+				Converters = new JsonConverter[] { new SequenceJsonConverter() }
 			};
 		}
 
@@ -51,7 +59,8 @@ namespace Ledger.Stores.Postgres
 				connection,
 				transaction,
 				sql => Events(context.StreamName, sql),
-				sql => Snapshots(context.StreamName, sql)
+				sql => Snapshots(context.StreamName, sql),
+				_jsonSettings
 			);
 		}
 
