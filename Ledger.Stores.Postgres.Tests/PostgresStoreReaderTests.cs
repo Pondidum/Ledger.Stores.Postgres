@@ -40,33 +40,17 @@ namespace Ledger.Stores.Postgres.Tests
 					.Select(i => i.AsSequence())
 					.Select(seq => new TestEvent { AggregateID = id, Sequence = seq, Stamp = DefaultStamper.Now() });
 
-				using (var transaciton = connection.BeginTransaction())
-				using (var command = connection.CreateCommand())
+				using (var writer = connection.BeginBinaryImport("COPY importstream_events(aggregateid, sequence, eventtype, event) from STDIN (format binary)"))
 				{
-					command.CommandText = "COPY importstream_events(aggregateid, sequence, eventtype, event) from STDIN;";
-					command.CommandTimeout = 600000;
-					command.Transaction = transaciton;
-
-					var serializer = new NpgsqlCopySerializer(connection);
-					var copy = new NpgsqlCopyIn(command, connection, serializer.ToStream);
-
-					copy.Start();
-
 					foreach (var @event in events)
 					{
-						serializer.AddString(@event.AggregateID.ToString());
-						serializer.AddInt32((int)@event.Sequence);
-						serializer.AddString(@event.GetType().AssemblyQualifiedName);
-						serializer.AddString(Serializer.Serialize(@event));
+						writer.StartRow();
 
-						serializer.EndRow();
-						serializer.Flush();
+						writer.Write(@event.AggregateID.ToString());
+						writer.Write((int)@event.Sequence);
+						writer.Write(@event.GetType().AssemblyQualifiedName);
+						writer.Write(Serializer.Serialize(@event));
 					}
-
-					copy.End();
-					serializer.Close();
-
-					transaciton.Commit();
 				}
 			}
 		}

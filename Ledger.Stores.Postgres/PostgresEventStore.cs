@@ -29,7 +29,7 @@ namespace Ledger.Stores.Postgres
 
 		public IStoreReader<TKey> CreateReader<TKey>(EventStoreContext context)
 		{
-			var connection = _connection.Clone();
+			var connection = _connection.CloneWith(_connection.ConnectionString);
 
 			if (connection.State != ConnectionState.Open)
 				connection.Open();
@@ -48,7 +48,7 @@ namespace Ledger.Stores.Postgres
 
 		public IStoreWriter<TKey> CreateWriter<TKey>(EventStoreContext context)
 		{
-			var connection = _connection.Clone();
+			var connection = _connection.CloneWith(_connection.ConnectionString);
 
 			if (connection.State != ConnectionState.Open)
 				connection.Open();
