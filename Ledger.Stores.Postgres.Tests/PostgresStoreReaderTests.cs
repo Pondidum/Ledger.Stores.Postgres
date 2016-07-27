@@ -13,7 +13,7 @@ namespace Ledger.Stores.Postgres.Tests
 	[Collection("Postgres Collection")]
 	public class PostgresStoreReaderTests
 	{
-		private const int TotalRecords = 1000000;
+		private const int TotalRecords = 100000;
 		public const string StreamName = "ImportStream";
 		private readonly PostgresEventStore _store;
 
