@@ -12,6 +12,7 @@ namespace Ledger.Stores.Postgres.Tests
 	[Collection("Postgres Collection")]
 	public class PostgresStoreReaderTests
 	{
+		private const int TotalRecords = 1000000;
 		public const string StreamName = "ImportStream";
 		private readonly PostgresEventStore _store;
 
@@ -35,7 +36,7 @@ namespace Ledger.Stores.Postgres.Tests
 				var id = Guid.NewGuid();
 
 				var events = Enumerable
-					.Range(0, 1000000)
+					.Range(0, TotalRecords)
 					.Select(i => i.AsSequence())
 					.Select(seq => new TestEvent { AggregateID = id, Sequence = seq, Stamp = DefaultStamper.Now() });
 
@@ -56,7 +57,7 @@ namespace Ledger.Stores.Postgres.Tests
 						serializer.AddString(@event.AggregateID.ToString());
 						serializer.AddInt32((int)@event.Sequence);
 						serializer.AddString(@event.GetType().AssemblyQualifiedName);
-						serializer.AddString(JsonConvert.SerializeObject(@event));
+						serializer.AddString(Serializer.Serialize(@event));
 
 						serializer.EndRow();
 						serializer.Flush();
@@ -77,7 +78,7 @@ namespace Ledger.Stores.Postgres.Tests
 			using (var reader = _store.CreateReader<Guid>(context))
 			{
 				//15 -> 20 seconds
-				Should.CompleteIn(() => reader.LoadAllEvents().Count().ShouldBe(1000000), TimeSpan.FromSeconds(20));
+				Should.CompleteIn(() => reader.LoadAllEvents().Count().ShouldBe(TotalRecords), TimeSpan.FromSeconds(20));
 			}
 		}
 	}

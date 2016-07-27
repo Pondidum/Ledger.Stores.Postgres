@@ -12,7 +12,7 @@ namespace Ledger.Stores.Postgres
 		public DomainEvent<TKey> Process(ITypeResolver typeResolver, JsonSerializerSettings jsonSettings)
 		{
 			var type = typeResolver.GetType(EventType);
-			var domainEvent = (DomainEvent<TKey>)JsonConvert.DeserializeObject(Event, type, jsonSettings);
+			var domainEvent = (DomainEvent<TKey>)Serializer.Deserialize(Event, type);
 
 			domainEvent.StreamSequence = new StreamSequence(StreamSequence);
 

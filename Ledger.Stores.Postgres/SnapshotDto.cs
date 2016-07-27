@@ -10,7 +10,7 @@ namespace Ledger.Stores.Postgres
 
 		public Snapshot<TKey> Process(ITypeResolver typeResolver, JsonSerializerSettings jsonSettings)
 		{
-			return (Snapshot<TKey>)JsonConvert.DeserializeObject(Snapshot, typeResolver.GetType(SnapshotType), jsonSettings);
+			return (Snapshot<TKey>)Serializer.Deserialize(Snapshot, typeResolver.GetType(SnapshotType));
 		}
 	}
 }
