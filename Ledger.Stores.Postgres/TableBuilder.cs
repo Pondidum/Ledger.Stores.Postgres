@@ -9,12 +9,12 @@ namespace Ledger.Stores.Postgres
 	{
 		private readonly Dictionary<Type, Action<string>> _creators;
 
-		public TableBuilder(NpgsqlConnection connection)
+		public TableBuilder(string connectionString)
 		{
 			_creators = new Dictionary<Type, Action<string>>
 			{
-				{typeof (Guid), stream => new CreateGuidAggregateTablesCommand(connection).Execute(stream)},
-				{typeof (int), stream => new CreateIntAggregateTablesCommand(connection).Execute(stream)}
+				{typeof (Guid), stream => new CreateGuidAggregateTablesCommand(connectionString).Execute(stream)},
+				{typeof (int), stream => new CreateIntAggregateTablesCommand(connectionString).Execute(stream)}
 			};
 		}
 

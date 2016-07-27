@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using Dapper;
 using Npgsql;
 
@@ -12,21 +11,19 @@ namespace Ledger.Stores.Postgres.Tests
 
 		public static readonly EventStoreContext TestContext = new EventStoreContext("TestStream", new DefaultTypeResolver());
 
-		public NpgsqlConnection Connection { get; set; }
-
 		private readonly List<string> _streams;
 
 		public PostgresFixture()
 		{
 			_streams = new List<string>();
 
-			Connection = new NpgsqlConnection(ConnectionString);
-			Connection.Open();
-
-			var create = new CreateGuidAggregateTablesCommand(Connection);
+			var create = new CreateGuidAggregateTablesCommand(ConnectionString);
 			create.Execute(TestContext.StreamName);
 
 			DropOnDispose(TestContext.StreamName);
+			DropOnDispose("testaggregatestream");
+			DropOnDispose("snapshotaggregatestream");
+			DropOnDispose("importstream");
 		}
 
 		public void DropOnDispose(string streamName)
@@ -36,22 +33,26 @@ namespace Ledger.Stores.Postgres.Tests
 
 		public void Dispose()
 		{
-			try
+			using (var connection = new NpgsqlConnection(ConnectionString))
 			{
+				connection.Open();
+
 				foreach (var stream in _streams)
 				{
-					Connection.Execute($"drop table if exists {TableBuilder.EventsName(stream)};");
-					Connection.Execute($"drop table if exists {TableBuilder.SnapshotsName(stream)};");
+					Catch(() => connection.Execute($"drop table if exists {TableBuilder.EventsName(stream)};"));
+					Catch(() => connection.Execute($"drop table if exists {TableBuilder.SnapshotsName(stream)};"));
 				}
+			}
+		}
+
+		private void Catch(Action action)
+		{
+			try
+			{
+				action();
 			}
 			catch (Exception)
 			{
-				//omg
-			}
-
-			if (Connection.State != ConnectionState.Closed)
-			{
-				Connection.Close();
 			}
 		}
 	}

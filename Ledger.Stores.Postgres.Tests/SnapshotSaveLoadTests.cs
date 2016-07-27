@@ -15,7 +15,7 @@ namespace Ledger.Stores.Postgres.Tests
 
 		public SnapshotSaveLoadTests(PostgresFixture fixture)
 		{
-			_store = new PostgresEventStore(fixture.Connection);
+			_store = new PostgresEventStore(PostgresFixture.ConnectionString);
 			_stamper = new IncrementingStamper();
 		}
 

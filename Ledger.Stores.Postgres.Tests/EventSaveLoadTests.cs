@@ -15,7 +15,7 @@ namespace Ledger.Stores.Postgres.Tests
 
 		public EventSaveLoadTests(PostgresFixture fixture)
 		{
-			_store = new PostgresEventStore(fixture.Connection);
+			_store = new PostgresEventStore(PostgresFixture.ConnectionString);
 		}
 
 		[RequiresPostgresFact]

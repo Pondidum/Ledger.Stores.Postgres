@@ -4,6 +4,7 @@ using Ledger.Acceptance.TestObjects;
 using Ledger.Infrastructure;
 using Newtonsoft.Json;
 using Npgsql;
+using NpgsqlTypes;
 using Shouldly;
 using Xunit;
 
@@ -18,20 +19,19 @@ namespace Ledger.Stores.Postgres.Tests
 
 		public PostgresStoreReaderTests(PostgresFixture fixture)
 		{
-			_store = new PostgresEventStore(fixture.Connection);
+			_store = new PostgresEventStore(PostgresFixture.ConnectionString);
 
 			fixture.DropOnDispose(StreamName);
-			CreateAndFillEvents();
 		}
 
 		private void CreateAndFillEvents()
 		{
+			var creator = new TableBuilder(PostgresFixture.ConnectionString);
+			creator.CreateTable(typeof(Guid), StreamName);
+
 			using (var connection = new NpgsqlConnection(PostgresFixture.ConnectionString))
 			{
 				connection.Open();
-
-				var creator = new TableBuilder(connection);
-				creator.CreateTable(typeof(Guid), StreamName);
 
 				var id = Guid.NewGuid();
 
@@ -46,7 +46,7 @@ namespace Ledger.Stores.Postgres.Tests
 					{
 						writer.StartRow();
 
-						writer.Write(@event.AggregateID.ToString());
+						writer.Write(@event.AggregateID.ToString(), NpgsqlDbType.Uuid);
 						writer.Write((int)@event.Sequence);
 						writer.Write(@event.GetType().AssemblyQualifiedName);
 						writer.Write(Serializer.Serialize(@event));
@@ -58,12 +58,20 @@ namespace Ledger.Stores.Postgres.Tests
 		[RequiresPostgresFact]
 		public void When_loading_all_events()
 		{
+			CreateAndFillEvents();
+
 			var context = new EventStoreContext("ImportStream", new DefaultTypeResolver());
-			using (var reader = _store.CreateReader<Guid>(context))
+			//15 -> 20 seconds
+			Should.CompleteIn(() =>
 			{
-				//15 -> 20 seconds
-				Should.CompleteIn(() => reader.LoadAllEvents().Count().ShouldBe(TotalRecords), TimeSpan.FromSeconds(20));
-			}
+				using (var reader = _store.CreateReader<Guid>(context))
+				{
+					reader
+						.LoadAllEvents()
+						.Count()
+						.ShouldBe(TotalRecords);
+				}
+			}, TimeSpan.FromSeconds(20));
 		}
 	}
 }

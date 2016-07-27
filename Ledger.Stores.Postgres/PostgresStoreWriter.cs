@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Dapper;
 using Ledger.Infrastructure;
-using Newtonsoft.Json;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres
@@ -14,10 +13,11 @@ namespace Ledger.Stores.Postgres
 		private readonly Func<string, string> _getEvents;
 		private readonly Func<string, string> _getSnapshots;
 
-		public PostgresStoreWriter(NpgsqlConnection connection, NpgsqlTransaction transaction, Func<string, string> getEvents, Func<string, string> getSnapshots)
+		public PostgresStoreWriter(string connectionString, Func<string, string> getEvents, Func<string, string> getSnapshots)
 		{
-			_connection = connection;
-			_transaction = transaction;
+			_connection = new NpgsqlConnection(connectionString);
+			_connection.Open();
+			_transaction = _connection.BeginTransaction();
 			_getEvents = getEvents;
 			_getSnapshots = getSnapshots;
 		}

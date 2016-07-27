@@ -7,13 +7,13 @@ namespace Ledger.Stores.Postgres.Tests
 	public class Acceptance : AcceptanceTests
 	{
 		public Acceptance(PostgresFixture fixture)
-			: base(new PostgresEventStore(fixture.Connection))
+			: base(new PostgresEventStore(PostgresFixture.ConnectionString))
 		{
 
-			var snapshotted = new CreateGuidAggregateTablesCommand(fixture.Connection);
+			var snapshotted = new CreateGuidAggregateTablesCommand(PostgresFixture.ConnectionString);
 			snapshotted.Execute(SnapshotStream.StreamName);
 
-			var normal = new CreateGuidAggregateTablesCommand(fixture.Connection);
+			var normal = new CreateGuidAggregateTablesCommand(PostgresFixture.ConnectionString);
 			normal.Execute(DefaultStream.StreamName);
 
 			fixture.DropOnDispose(SnapshotStream.StreamName);

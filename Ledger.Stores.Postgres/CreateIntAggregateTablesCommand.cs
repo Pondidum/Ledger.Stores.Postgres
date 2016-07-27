@@ -23,11 +23,11 @@ create table if not exists {snapshots-table} (
 );
 ";
 
-		private readonly NpgsqlConnection _connection;
+		private readonly string _connectionString;
 
-		public CreateIntAggregateTablesCommand(NpgsqlConnection connection)
+		public CreateIntAggregateTablesCommand(string connectionString)
 		{
-			_connection = connection;
+			_connectionString = connectionString;
 		}
 
 		public void Execute(string stream)
@@ -36,7 +36,11 @@ create table if not exists {snapshots-table} (
 				.Replace("{events-table}", stream + "_events")
 				.Replace("{snapshots-table}", stream + "_snapshots");
 
-			_connection.Execute(sql);
+			using (var connection = new NpgsqlConnection(_connectionString))
+			{
+				connection.Open();
+				connection.Execute(sql);
+			}
 		}
 	}
 }

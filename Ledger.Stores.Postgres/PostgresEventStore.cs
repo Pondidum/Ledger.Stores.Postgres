@@ -13,25 +13,17 @@ namespace Ledger.Stores.Postgres
 			SqlMapper.AddTypeHandler(new SequenceTypeHandler());
 		}
 
-		private readonly NpgsqlConnection _connection;
+		private readonly string _connectionString;
 
-		public PostgresEventStore(NpgsqlConnection connection)
+		public PostgresEventStore(string connection)
 		{
-			_connection = connection;
+			_connectionString = connection;
 		}
 
 		public IStoreReader<TKey> CreateReader<TKey>(EventStoreContext context)
 		{
-			var connection = _connection.CloneWith(_connection.ConnectionString);
-
-			if (connection.State != ConnectionState.Open)
-				connection.Open();
-
-			var transaction = connection.BeginTransaction();
-
 			return new PostgresStoreReader<TKey>(
-				connection,
-				transaction,
+				_connectionString,
 				sql => Events(context.StreamName, sql),
 				sql => Snapshots(context.StreamName, sql),
 				context.TypeResolver
@@ -40,16 +32,8 @@ namespace Ledger.Stores.Postgres
 
 		public IStoreWriter<TKey> CreateWriter<TKey>(EventStoreContext context)
 		{
-			var connection = _connection.CloneWith(_connection.ConnectionString);
-
-			if (connection.State != ConnectionState.Open)
-				connection.Open();
-
-			var transaction = connection.BeginTransaction();
-
 			return new PostgresStoreWriter<TKey>(
-				connection,
-				transaction,
+				_connectionString,
 				sql => Events(context.StreamName, sql),
 				sql => Snapshots(context.StreamName, sql)
 			);

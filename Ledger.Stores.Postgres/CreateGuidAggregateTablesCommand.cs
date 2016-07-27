@@ -24,11 +24,11 @@ create table if not exists {snapshots-table} (
 	snapshot json not null
 );
 ";
-		private readonly NpgsqlConnection _connection;
+		private readonly string _connectionString;
 
-		public CreateGuidAggregateTablesCommand(NpgsqlConnection connection)
+		public CreateGuidAggregateTablesCommand(string connectionStringString)
 		{
-			_connection = connection;
+			_connectionString = connectionStringString;
 		}
 
 		public void Execute(string stream)
@@ -37,7 +37,11 @@ create table if not exists {snapshots-table} (
 				.Replace("{events-table}", TableBuilder.EventsName(stream))
 				.Replace("{snapshots-table}", TableBuilder.SnapshotsName(stream));
 
-			_connection.Execute(sql);
+			using (var connection = new NpgsqlConnection(_connectionString))
+			{
+				connection.Open();
+				connection.Execute(sql);
+			}
 		}
 	}
 }
