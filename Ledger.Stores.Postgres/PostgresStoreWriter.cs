@@ -13,15 +13,13 @@ namespace Ledger.Stores.Postgres
 		private readonly NpgsqlTransaction _transaction;
 		private readonly Func<string, string> _getEvents;
 		private readonly Func<string, string> _getSnapshots;
-		private readonly JsonSerializerSettings _jsonSettings;
 
-		public PostgresStoreWriter(NpgsqlConnection connection, NpgsqlTransaction transaction, Func<string, string> getEvents, Func<string, string> getSnapshots, JsonSerializerSettings jsonSettings)
+		public PostgresStoreWriter(NpgsqlConnection connection, NpgsqlTransaction transaction, Func<string, string> getEvents, Func<string, string> getSnapshots)
 		{
 			_connection = connection;
 			_transaction = transaction;
 			_getEvents = getEvents;
 			_getSnapshots = getSnapshots;
-			_jsonSettings = jsonSettings;
 		}
 
 		public Sequence? GetLatestSequenceFor(TKey aggregateID)

@@ -14,17 +14,10 @@ namespace Ledger.Stores.Postgres
 		}
 
 		private readonly NpgsqlConnection _connection;
-		private readonly JsonSerializerSettings _jsonSettings;
 
 		public PostgresEventStore(NpgsqlConnection connection)
 		{
 			_connection = connection;
-
-			_jsonSettings = new JsonSerializerSettings
-			{
-				TypeNameHandling = TypeNameHandling.Auto,
-				Converters = new JsonConverter[] { new SequenceJsonConverter() }
-			};
 		}
 
 		public IStoreReader<TKey> CreateReader<TKey>(EventStoreContext context)
@@ -41,7 +34,6 @@ namespace Ledger.Stores.Postgres
 				transaction,
 				sql => Events(context.StreamName, sql),
 				sql => Snapshots(context.StreamName, sql),
-				_jsonSettings,
 				context.TypeResolver
 			);
 		}
@@ -59,8 +51,7 @@ namespace Ledger.Stores.Postgres
 				connection,
 				transaction,
 				sql => Events(context.StreamName, sql),
-				sql => Snapshots(context.StreamName, sql),
-				_jsonSettings
+				sql => Snapshots(context.StreamName, sql)
 			);
 		}
 

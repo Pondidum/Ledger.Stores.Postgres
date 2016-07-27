@@ -1,5 +1,4 @@
 ﻿using Ledger.Infrastructure;
-using Newtonsoft.Json;
 
 namespace Ledger.Stores.Postgres
 {
@@ -9,7 +8,7 @@ namespace Ledger.Stores.Postgres
 		public string EventType { get; set; }
 		public string Event { get; set; }
 
-		public DomainEvent<TKey> Process(ITypeResolver typeResolver, JsonSerializerSettings jsonSettings)
+		public DomainEvent<TKey> Process(ITypeResolver typeResolver)
 		{
 			var type = typeResolver.GetType(EventType);
 			var domainEvent = (DomainEvent<TKey>)Serializer.Deserialize(Event, type);
