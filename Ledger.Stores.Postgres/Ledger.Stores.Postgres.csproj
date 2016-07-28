@@ -58,6 +58,7 @@
     <Compile Include="CreateGuidAggregateTablesCommand.cs" />
     <Compile Include="CreateIntAggregateTablesCommand.cs" />
     <Compile Include="EventDto.cs" />
+    <Compile Include="Infrastructure\IgnoreStreamSequenceContractResolver.cs" />
     <Compile Include="PostgresEventStore.cs" />
     <Compile Include="PostgresStoreReader.cs" />
     <Compile Include="PostgresStoreWriter.cs" />
