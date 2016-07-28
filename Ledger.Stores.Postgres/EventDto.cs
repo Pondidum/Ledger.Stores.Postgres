@@ -1,4 +1,5 @@
 ﻿using Ledger.Infrastructure;
+using Ledger.Stores.Postgres.Infrastructure;
 
 namespace Ledger.Stores.Postgres
 {

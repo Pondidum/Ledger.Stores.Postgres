@@ -2,7 +2,7 @@ using System.Data;
 using Dapper;
 using Ledger.Infrastructure;
 
-namespace Ledger.Stores.Postgres
+namespace Ledger.Stores.Postgres.Infrastructure
 {
 	public class SequenceTypeHandler : SqlMapper.TypeHandler<Sequence>
 	{

@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Ledger.Stores.Postgres
+namespace Ledger.Stores.Postgres.Infrastructure
 {
 	public static class Serializer
 	{

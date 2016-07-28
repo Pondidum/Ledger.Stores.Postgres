@@ -2,7 +2,7 @@ using System;
 using Ledger.Infrastructure;
 using Newtonsoft.Json;
 
-namespace Ledger.Stores.Postgres
+namespace Ledger.Stores.Postgres.Infrastructure
 {
 	public class SequenceJsonConverter : JsonConverter
 	{

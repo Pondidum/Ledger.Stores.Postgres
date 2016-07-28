@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dapper;
 using Ledger.Infrastructure;
+using Ledger.Stores.Postgres.Infrastructure;
 using Npgsql;
 
 namespace Ledger.Stores.Postgres

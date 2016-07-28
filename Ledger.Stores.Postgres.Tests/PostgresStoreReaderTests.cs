@@ -2,6 +2,7 @@
 using System.Linq;
 using Ledger.Acceptance.TestObjects;
 using Ledger.Infrastructure;
+using Ledger.Stores.Postgres.Infrastructure;
 using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;

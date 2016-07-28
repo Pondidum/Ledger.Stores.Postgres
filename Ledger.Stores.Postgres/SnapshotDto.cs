@@ -1,3 +1,5 @@
+using Ledger.Stores.Postgres.Infrastructure;
+
 namespace Ledger.Stores.Postgres
 {
 	internal class SnapshotDto<TKey>

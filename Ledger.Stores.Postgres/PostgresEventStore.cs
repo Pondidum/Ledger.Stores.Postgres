@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using Dapper;
+using Ledger.Stores.Postgres.Infrastructure;
 using Newtonsoft.Json;
 using Npgsql;
 
