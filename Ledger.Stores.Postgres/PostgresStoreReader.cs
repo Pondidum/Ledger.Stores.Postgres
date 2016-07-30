@@ -70,6 +70,15 @@ namespace Ledger.Stores.Postgres
 				.Select(e => e.Process(_typeResolver));
 		}
 
+		public IEnumerable<DomainEvent<TKey>> LoadAllEventsSince(StreamSequence streamSequence)
+		{
+			var sql = _getEvents("select streamSequence, eventType, event from {table} where streamSequence > @streamSequence order by sequence asc");
+
+			return _connection
+				.Query<EventDto<TKey>>(sql, param: new { streamSequence = (int)streamSequence }, transaction: _transaction, buffered: false)
+				.Select(e => e.Process(_typeResolver));
+		}
+
 		public void Dispose()
 		{
 			_transaction.Commit();
