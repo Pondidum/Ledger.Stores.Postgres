@@ -17,13 +17,15 @@ namespace Ledger.Stores.Postgres.Tests
 		{
 			_streams = new List<string>();
 
-			var create = new CreateGuidAggregateTablesCommand(ConnectionString);
-			create.Execute(TestContext.StreamName);
-
 			DropOnDispose(TestContext.StreamName);
 			DropOnDispose("testaggregatestream");
 			DropOnDispose("snapshotaggregatestream");
 			DropOnDispose("importstream");
+
+			Cleanup();
+
+			var create = new CreateGuidAggregateTablesCommand(ConnectionString);
+			create.Execute(TestContext.StreamName);
 		}
 
 		public void DropOnDispose(string streamName)
@@ -32,6 +34,11 @@ namespace Ledger.Stores.Postgres.Tests
 		}
 
 		public void Dispose()
+		{
+			Cleanup();
+		}
+
+		private void Cleanup()
 		{
 			using (var connection = new NpgsqlConnection(ConnectionString))
 			{
